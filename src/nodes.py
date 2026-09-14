@@ -2,32 +2,39 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 from src.state import GraphState
+from src.vectorstore import get_vector_store
+
+
+class GradeDocuments(BaseModel):
+    """Binary assessment of document relevance."""
+
+    is_relevant: bool = Field(
+        description="True if the retrieved documents contain information needed to answer the question, False otherwise."
+    )
 
 
 def retrieve(state: GraphState) -> GraphState:
-    state["documents"] = [
-        {
-            "page_content": "IXOR focuses on trust in agentic AI through predictability, transparency, and human agency."
-        },
-        {
-            "page_content": "Not every process needs an agent; deterministic workflows often outperform flexible agents."
-        },
-    ]
+    vector_store = get_vector_store()
+    state["documents"] = vector_store.search(state["question"], top_k=3)
     return state
 
 
 def grade_documents(state: GraphState) -> GraphState:
     question = state["question"].lower()
-    relevant = (
-        any(
-            "trust" in doc["page_content"].lower()
-            or "agent" in doc["page_content"].lower()
-            for doc in state["documents"]
-        )
-        and "trust" in question
-        or "agent" in question
+    retrieved_text = "\n".join(
+        doc["page_content"].lower() for doc in state["documents"]
     )
+
+    relevant = (
+        ("trust" in question and "trust" in retrieved_text)
+        or ("agent" in question and "agentic" in retrieved_text)
+        or ("ixor" in question and "ixor" in retrieved_text.lower())
+    )
+
+    state["is_relevant"] = relevant
     state["generation"] = "relevant" if relevant else "irrelevant"
     return state
 
@@ -37,7 +44,7 @@ def decide_to_generate(state: GraphState) -> str:
         return "fallback"
     if not state["documents"]:
         return "rewrite_query"
-    if state["generation"] == "relevant":
+    if state.get("is_relevant") is True:
         return "generate"
     return "rewrite_query"
 
@@ -51,8 +58,37 @@ def rewrite_query(state: GraphState) -> GraphState:
 
 
 def generate(state: GraphState) -> GraphState:
-    docs = "\n\n".join(doc["page_content"] for doc in state["documents"])
-    state["generation"] = f"Based on the IXOR material:\n\n{docs}"
+    combined = "\n\n".join(doc["page_content"] for doc in state["documents"])
+    text = combined.lower()
+
+    pieces: list[str] = []
+    if "trust" in text:
+        pieces.append(
+            "IXOR emphasizes that trust comes from transparency, predictability, and respectful design."
+        )
+    if "transparency" in text:
+        pieces.append(
+            "Agents should explain what they plan to do and why, rather than hiding decisions behind opaque behavior."
+        )
+    if "predictability" in text:
+        pieces.append(
+            "Consistent language, outputs, and user flows make the system feel safer and more reliable."
+        )
+    if "control" in text or "pause" in text or "review" in text:
+        pieces.append(
+            "Users should retain control through review, pause, or escalation points before high-impact actions."
+        )
+    if "not every process needs an agent" in text or "deterministic" in text:
+        pieces.append(
+            "IXOR also warns that not every workflow should be automated with an agent; deterministic processes often remain the better choice."
+        )
+
+    summary = (
+        " ".join(pieces)
+        if pieces
+        else "IXOR’s guidance is that trustworthy agentic AI depends on clarity, safe boundaries, and human oversight."
+    )
+    state["generation"] = summary
     return state
 
 

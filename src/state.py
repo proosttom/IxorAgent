@@ -7,3 +7,4 @@ class GraphState(TypedDict):
     documents: List[Dict[str, Any]]
     retry_count: int
     generation: str
+    is_relevant: bool

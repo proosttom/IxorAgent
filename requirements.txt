@@ -1,1 +1,5 @@
 pytest
+pydantic
+langchain-core
+langchain-community
+faiss-cpu

@@ -1,6 +1,6 @@
 # IXOR CRAG Agent
 
-A lean proof-of-concept for a corrective RAG pattern built around a minimal state machine.
+A compact corrective RAG prototype built around IXOR's impact papers on trust, autonomy, and agentic AI.
 
 ## Architecture
 
@@ -8,24 +8,63 @@ A lean proof-of-concept for a corrective RAG pattern built around a minimal stat
 [User Question]
       |
       v
-[Retrieve] -> [Grade Documents]
+[Retrieve from IXOR corpus]
       |
-      +--> relevant --> [Generate]
+      v
+[Grade relevance]
+      |
+      +--> relevant --> [Generate grounded answer]
       |
       +--> irrelevant + retry < 2 --> [Rewrite Query] -> [Retrieve]
       |
       +--> retry >= 2 --> [Fallback]
 ```
 
-## Core idea
+## What it demonstrates
 
-- Retrieve candidate context from a local knowledge base.
-- Grade relevance before generation.
-- Rewrite the query when evidence is weak.
-- Stop with a controlled fallback if retries are exhausted.
+- Local knowledge retrieval from IXOR source material
+- Relevance grading before generation
+- Query rewriting when evidence is weak
+- Safe fallback behavior when retries are exhausted
+
+## Project layout
+
+```text
+.
+├── data/
+│   ├── ixor_impact_papers.txt
+│   └── ixor_papers/
+├── src/
+│   ├── app.py
+│   ├── graph.py
+│   ├── nodes.py
+│   ├── state.py
+│   └── vectorstore.py
+├── tests/
+│   └── test_graph_routing.py
+├── Dockerfile
+├── requirements.txt
+├── pytest.ini
+└── README.md
+```
 
 ## Run
 
 ```bash
-pytest
+/usr/local/bin/python3 src/app.py
 ```
+
+## Test
+
+```bash
+/usr/local/bin/python3 -m pytest -q
+```
+
+## Docker
+
+```bash
+docker build -t ixor-crag-agent .
+docker run --rm ixor-crag-agent
+```
+
+This demo is designed to show a reliable, testable CRAG pattern: fetch only IXOR-relevant context, validate it, and answer with guardrails instead of unbounded generation.

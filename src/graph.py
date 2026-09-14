@@ -18,6 +18,7 @@ def run_agent(question: str) -> GraphState:
         "documents": [],
         "retry_count": 0,
         "generation": "",
+        "is_relevant": False,
     }
 
     state = retrieve(state)
