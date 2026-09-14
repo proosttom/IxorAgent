@@ -51,8 +51,20 @@ A compact corrective RAG prototype built around IXOR's impact papers on trust, a
 ## Run
 
 ```bash
-/usr/local/bin/python3 src/app.py
+/usr/local/bin/python3 src/app.py "How can IXOR earn users' trust in agentic AI?"
 ```
+
+You can pass any question as a command-line argument to query the IXOR corpus dynamically.
+
+If you run the app without arguments, it enters an interactive loop and keeps asking for questions until you type `exit`, `quit`, or `q`.
+
+### Example questions
+
+```bash
+/usr/local/bin/python3 src/app.py "What does IXOR say about transparency and trust in agentic AI?"
+/usr/local/bin/python3 src/app.py "When should an organization avoid using an agent?"
+/usr/local/bin/python3 src/app.py "What is IXOR's view on autonomy vs accountability?"
+``` 
 
 ## Test
 

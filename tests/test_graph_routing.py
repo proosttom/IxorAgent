@@ -69,3 +69,63 @@ def test_generate_returns_polished_summary(mock_state):
     assert "predictability" in result["generation"].lower()
     assert "Title:" not in result["generation"]
     assert "--- PAGE" not in result["generation"]
+
+
+def test_generate_variants_for_different_questions():
+    trust_state = {
+        "question": "How can IXOR earn users' trust in agentic AI?",
+        "original_question": "How can IXOR earn users' trust in agentic AI?",
+        "documents": [
+            {
+                "page_content": "Trust in agentic AI depends on transparency, predictability, and respectful design. Agents must explain decisions and let users review or pause actions."
+            }
+        ],
+        "retry_count": 0,
+        "generation": "",
+        "is_relevant": True,
+    }
+    autonomy_state = {
+        "question": "What is IXOR's view on autonomy vs accountability?",
+        "original_question": "What is IXOR's view on autonomy vs accountability?",
+        "documents": [
+            {
+                "page_content": "Business Architecture links autonomy and accountability by defining responsibilities, boundaries, and oversight. The system should stay aligned with business goals and ethical standards."
+            }
+        ],
+        "retry_count": 0,
+        "generation": "",
+        "is_relevant": True,
+    }
+
+    trust_result = generate(trust_state)
+    autonomy_result = generate(autonomy_state)
+
+    assert trust_result["generation"] != autonomy_result["generation"]
+    assert "trust" in trust_result["generation"].lower()
+    assert "autonomy" in autonomy_result["generation"].lower()
+    assert "accountability" in autonomy_result["generation"].lower()
+
+    from src.graph import run_agent
+
+    trust_answer = run_agent("How can IXOR earn users' trust in agentic AI?")[
+        "generation"
+    ]
+    autonomy_answer = run_agent("What is IXOR's view on autonomy vs accountability?")[
+        "generation"
+    ]
+
+    assert trust_answer != autonomy_answer
+    assert "trust" in trust_answer.lower()
+    assert (
+        "autonomy" in autonomy_answer.lower()
+        or "accountability" in autonomy_answer.lower()
+    )
+
+
+def test_bogus_question_falls_back_instead_of_generating():
+    from src.graph import run_agent
+
+    result = run_agent("X")
+
+    assert result["generation"].startswith("I couldn't find sufficient IXOR material")
+    assert result["retry_count"] == 2

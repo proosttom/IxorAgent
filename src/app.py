@@ -9,7 +9,31 @@ if str(ROOT) not in sys.path:
 
 from src.graph import run_agent
 
+
+def main() -> None:
+    if len(sys.argv) > 1:
+        questions = [" ".join(sys.argv[1:])]
+    else:
+        questions = ["How can IXOR earn users' trust in agentic AI?"]
+
+    if len(sys.argv) == 1:
+        print("Ask a question about IXOR and agentic AI. Type 'exit' to quit.")
+        while True:
+            raw = input("Question: ").strip()
+            if raw.lower() in {"exit", "quit", "q"}:
+                print("Goodbye.")
+                break
+            if not raw:
+                print("Please enter a question.")
+                continue
+            response = run_agent(raw)
+            print(response["generation"])
+        return
+
+    for question in questions:
+        response = run_agent(question)
+        print(response["generation"])
+
+
 if __name__ == "__main__":
-    question = "How can IXOR earn users' trust in agentic AI?"
-    response = run_agent(question)
-    print(response["generation"])
+    main()
