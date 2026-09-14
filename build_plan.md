@@ -1,8 +1,6 @@
 ```markdown
 # Implementation Plan: Corrective RAG (CRAG) Agent with LangGraph
 
-**Target Delivery:** Thursday evening (prior to Friday interview)  
-**Total Estimated Effort:** ~3 to 4 hours  
 **Objective:** Build a self-reflective RAG agent over IXOR's published thought leadership ("Impact Papers") using `langgraph` and `pytest`, demonstrating rapid framework adoption and production software engineering practices.
 
 ---

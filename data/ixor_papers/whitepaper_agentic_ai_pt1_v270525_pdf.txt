@@ -1,0 +1,127 @@
+Title: whitepaper_agentic_ai_pt1_v270525.pdf
+Source: https://cdn.prod.website-files.com/6412b48edc5e88a17ae7c2a0/687a4c311bc18d19739f6953_IXOR-COMMSTRAT-GRAPHIC-ONEPAGERS_WHITEPAPER_AGENTICAIPT1v270525.pdf
+
+--- PAGE 1 ---
+digital impact created by talent
+What  
+Agentic AI  
+taught us.
+What is Agentic AI 
+and why does it matter?
+Part 1
+Photo by Cash Macanaya on Unsplash
+Copyright 2025 Ixor BV
+
+--- PAGE 2 ---
+What is Agentic AI?
+Traditional AI... 
+ 
+Traditional AI excels at performing single, well-defined tasks based on user input
+or pre-trained knowledge. Think of models that classify images, extract data
+from invoices, or answer questions based on a document.
+... Versus Agentic AI.
+Agentic AI takes this further by giving AI the autonomy to take initiative, plan, and 
+interact with external systems, to achieve a goal. These systems don’t just respond, 
+they act.
+www.ixor.be
+The differences between 
+Traditional AI, Generative AI and Agentic AI
+Purpose
+Learning
+Autonomy
+Traditional AI
+Relies on fixed rules 
+and updates.
+Generative AI
+Learns from  
+large datasets.
+Agentic AI
+Automates repetitive,  
+rule-based tasks.
+Creates content 
+based on prompts.
+Reaches goals  
+through decision- 
+making and action.
+Adapts through  
+experience and 
+feedback.
+Fully dependent on 
+pre-coded logic.
+Needs guidance  
+to operate.
+Acts with minimal 
+human input.
+
+--- PAGE 3 ---
+www.ixor.be
+1. From smart to autonomous
+Agentic AI enables systems that don’t wait for instructions, but proactively solve 
+problems, look up missing information, and adapt their behaviour based on feedback. 
+This opens the door to fully automated and optimized workflows. It also allows  
+multiple agents to collaborate, each with their own role, working together to solve 
+complex tasks.
+2. It changes how we build systems
+Instead of coding for every exception, we now design agents that simulate reasoning 
+and planning to make context-aware decisions in complex, real-world environments.
+These systems don’t follow rigid scripts, they adapt based on goals, feedback, and 
+new information.
+3. It’s more human-friendly 
+ 
+Agentic systems work with goals written in natural language, allowing users to  
+describe what they want, and developers to guide agent behaviour without  
+hardcoding rules.
+4. It unlocks new use cases
+From customer support agents that escalate only when needed, to systems that
+automate research, summarise lengthy documents, or coordinate tasks across 
+teams, the possibilities are growing fast.
+Why does it matter?
+
+--- PAGE 4 ---
+Why now?
+Recent innovations provide the components needed to build agentic systems that 
+are secure, scalable, and ready for production.
+At Ixor, we see Agentic AI as the next logical step in making technology more  
+useful, more proactive, and ultimately, more impactful.
+Who is Agentic AI for?
+• Decision-makers looking to boost efficiency, reduce  
+manual work, or unlock new digital services. Agentic AI 
+makes it possible to rethink internal workflows, customer  
+interactions, and business operations. 
+• Technical teams who want to build scalable, intelligent 
+systems that go beyond prototypes. Agentic AI offers the 
+frameworks to create production-ready, end-to-end  
+solutions, designed to be deployed, maintained, and  
+delivered to real customers. With fewer hard-coded rules 
+and more autonomy, these systems adapt, evolve, and 
+support practical use in real-world scenarios. 
+• Innovation leads and product owners exploring how AI  
+can take the next step beyond prediction or automation.  
+Agentic AI enables the shift from static tools to dynamic, 
+goal-driven digital assistants.
+What can Ixor do?
+At Ixor, we have already brought several Agentic AI 
+projects into production, and are currently working  
+on more.  
+ 
+This gives us a strong foundation of real-world  
+experience, not just theoretical knowledge.
+Our teams understand what works, where the pitfalls 
+are, and how to translate the promise of Agentic AI 
+into practical, scalable solutions.  
+ 
+Whether you’re exploring the potential or ready to 
+start building, we can help you move forward with 
+clarity and confidence.
+janpieter.cootjans@ixor.be 
++32 (0)475 20 57 67 
+www.ixor.be
+For any questions 
+about Agentic AI,  
+contact Jan Pieter 
+Cootjans, our  
+in-house expert. 
+digital impact created by talent
+In part 2 we will talk about
+Agentic AI en Privacy  (Autonomy vs.  
+Accountability). So stay tuned!

@@ -1,5 +1,456 @@
-IXOR Impact Papers: trust in agentic AI
+IXOR Impact Papers from https://www.ixor.be/impact-papers
 
-- Trust in agentic AI depends on predictability, transparency, and human agency.
-- The right question is not whether an agent can act, but whether it can act safely and explainably.
-- Not every process needs an agent. Deterministic workflows often outperform flexible autonomous systems when clarity and control are required.
+Included papers:
+- How to earn users’ trust in Agentic AI (Impact Paper 3)
+- What Agentic AI taught us: Balancing autonomy and accountability in Agentic AI (Part 2)
+- What Agentic AI taught us: Agentic AI fundamentals and practical adoption (Part 1)
+
+FILE: whitepaper_agentic_ai_2_v010725.pdf
+SOURCE: https://cdn.prod.website-files.com/6412b48edc5e88a17ae7c2a0/687a4c18a44d5a258952861d_IXOR-COMMSTRAT-GRAPHIC-ONEPAGERS_WHITEPAPER_AGENTICAI2v010725.pdf
+
+--- PAGE 1 ---
+digital impact created by talent
+What  
+Agentic AI  
+taught us.
+Balancing autonomy  
+and accountability  
+in Agentic AI
+Part 2
+
+--- PAGE 2 ---
+The new privacy equation
+Autonomy vs. Accountability
+In our recent projects with Agentic AI, we’ve seen how autonomy changes the nature  
+of privacy risks. These systems don’t just wait for instructions, they take action, use 
+tools, retrieve information, and make decisions to reach a defined goal. That makes 
+them far more dynamic than traditional automation.
+This shift raises urgent questions. 
+It’s no longer only about what data is processed but also when, how, and by  
+whom. Because agents can act independently, classic privacy measures like  
+consent prompts or logging at predefined moments are no longer sufficient.  
+We need to rethink how we design, control, and monitor intelligent systems that  
+act on our behalf.
+As autonomy increases, clarity around responsibility decreases. Because, what  
+happens when an agent takes an action that wasn’t explicitly programmed or one 
+that creates a privacy risk no one anticipated?
+In traditional systems, responsibility lies with those who define the rules. But agents 
+operate based on flexible goals, making decisions in real time using natural language 
+instructions, memory, and tool use. This means their behaviour can evolve in ways 
+that are useful but also unpredictable.
+If limits aren’t clearly defined, agents may: 
+• Search internal systems for sensitive info without user awareness.
+• Retain context across sessions in ways that violate data retention policies.
+• Activate third-party APIs with personal data without sufficient oversight.
+This demands a new approach to accountability. One where responsibility is shared 
+between developers, the organisation, and the system’s design. Auditable logs, 
+behavioural constraints, and explainability are no longer ‘nice to have’, but essential 
+foundations.
+www.ixor.be
+
+--- PAGE 3 ---
+www.ixor.be
+Business Architecture bridges the gap between autonomy and accountability.
+It defines how AI systems can grow in independence while staying aligned with business goals,  
+ethical standards, and transparent control. The graphic below shows how autonomy, maturity, and responsibility  
+connect, and how structure enables trust at scale.
+AI Autonomy
+Business Architecture links  
+AI autonomy to business  
+value by defining roles  
+and outcomes.
+AI Maturity
+Business Architecture helps 
+scale AI from tools to  
+decision-makers by defining 
+autonomy levels.
+Responsible AI
+Business Architecture ensures  
+AI follows ethical principles by  
+embedding accountability 
+and control.
+Business Architecture
+Business Architecture connects responsibility, autonomy,  
+and maturity for scalable agentic AI.
+Privacy risks in agentic systems
+We’ve identified key privacy risks that organisations need to manage:
+ 
+Uncontrolled memory
+Agents may remember user inputs, metadata, or retrieved content longer than  
+needed or reuse context from past interactions unexpectedly.
+ 
+Hard-to-explain decisions
+It’s not always possible to reconstruct the exact reasoning behind a choice  
+the agent made, especially when it involves multiple tools or memory layers.
+ 
+Unclear or missing consent
+Users may not realise that by giving a high-level goal, they’ve also approved  
+downstream actions they didn’t explicitly authorise.
+ 
+Emergent behaviour
+Because agents combine planning, execution and feedback, unexpected chains  
+of behaviour can emerge, some helpful, some risky.
+Security vulnerabilities
+Autonomous agents may become targets for adversarial attacks or prompt  
+manipulation, which can result in harmful decisions or data misuse.
+
+--- PAGE 4 ---
+www.ixor.be
+Example in practice:
+An agent built to schedule meetings accessed calendars  
+and sent invites autonomously. During testing, it started  
+including private notes like “on sick leave” in the invites,  
+information not meant to be shared.
+A privacy-first redesign fixed this by limiting memory,  
+removing sensitive metadata, and logging outputs for  
+review. A small shift toward guided autonomy made  
+the agent safer and more trustworthy.
+How to build privacy-friendly agents
+Based on our experience designing and deploying production-ready Agentic AI,  
+we recommend six principles to help balance privacy with autonomy:
+1. Set clear boundaries for autonomy
+Limit what the agent can do independently: define which tools, which memory 
+types, and which actions require confirmation or escalation. 
+2. Make consent dynamic and contextual
+Consent should not be a one-time checkbox. It must adapt to the situation and be 
+revisitable; users need clarity on what they’re allowing the agent to do. 
+3. Ensure traceability
+Log every key step in a human-readable format: decisions, retrieved content, tool 
+activations. This is essential for audits and trust. 
+4. Build in fallbacks and human-in-the-loop paths
+When confidence drops or potential risk is detected, the agent should pause or es-
+calate, not guess. 
+5. Practice data minimisation by default
+Agents should only access the minimum data required to achieve the user’s goal, 
+and only retain it as long as needed. 
+6. Monitor behaviour in real time
+Use continuous monitoring tools to detect unusual or risky actions.  
+Real-time oversight helps prevent escalation before privacy is compromised.
+Other measures such as encryption, access control, anonymisation, and  
+governance policies, can further strengthen privacy protections depending  
+on your system’s complexity.
+
+--- PAGE 5 ---
+What’s next: privacy in the age of (Agentic) AI
+The upcoming EU AI Act and existing GDPR rules are just the beginning.  
+As autonomous systems grow more powerful, privacy will no longer be solved by 
+checklists. It will become a continuous process, something that must be built into 
+every level of the AI lifecycle.
+ 
+Organisations need to: 
+• Design with privacy in mind from day one.
+• Include legal, UX, and technical experts early in the development process.
+• Create clear rules for agent behaviour and mechanisms to explain or challenge 
+what they do.
+• Consider advanced safeguards like zero-trust data vaults, which let agents make 
+decisions without accessing raw data directly.
+ 
+At Ixor, we’ve seen how Agentic AI can bring immense value but only when guided 
+by structure, safeguards, and a clear understanding of accountability. We don’t just 
+follow the trend, we build systems that are ready for the real world, and safe for the 
+people who use them.
+What can Ixor do?
+At Ixor, we have already brought several Agentic AI 
+projects into production, and are currently working  
+on more.  
+ 
+This gives us a strong foundation of real-world  
+experience, not just theoretical knowledge.
+Our teams understand what works, where the pitfalls 
+are, and how to translate the promise of Agentic AI 
+into practical, scalable solutions.  
+ 
+Whether you’re exploring the potential or ready to 
+start building, we can help you move forward with 
+clarity and confidence.
+janpieter.cootjans@ixor.be 
++32 (0)475 20 57 67 
+www.ixor.be
+For any questions 
+about Agentic AI,  
+contact Jan Pieter 
+Cootjans, our  
+in-house expert. 
+digital impact created by talent
+In our next paper, we’ll explore how Agentic AI can earn the trust of users through transparency,  
+predictability, and respectful behaviour. Because no matter how smart an agent is,  
+people won’t use it if they don’t feel comfortable with it.
+
+
+FILE: whitepaper_agentic_ai_pt1_v270525.pdf
+SOURCE: https://cdn.prod.website-files.com/6412b48edc5e88a17ae7c2a0/687a4c311bc18d19739f6953_IXOR-COMMSTRAT-GRAPHIC-ONEPAGERS_WHITEPAPER_AGENTICAIPT1v270525.pdf
+
+--- PAGE 1 ---
+digital impact created by talent
+What  
+Agentic AI  
+taught us.
+What is Agentic AI 
+and why does it matter?
+Part 1
+Photo by Cash Macanaya on Unsplash
+Copyright 2025 Ixor BV
+
+--- PAGE 2 ---
+What is Agentic AI?
+Traditional AI... 
+ 
+Traditional AI excels at performing single, well-defined tasks based on user input
+or pre-trained knowledge. Think of models that classify images, extract data
+from invoices, or answer questions based on a document.
+... Versus Agentic AI.
+Agentic AI takes this further by giving AI the autonomy to take initiative, plan, and 
+interact with external systems, to achieve a goal. These systems don’t just respond, 
+they act.
+www.ixor.be
+The differences between 
+Traditional AI, Generative AI and Agentic AI
+Purpose
+Learning
+Autonomy
+Traditional AI
+Relies on fixed rules 
+and updates.
+Generative AI
+Learns from  
+large datasets.
+Agentic AI
+Automates repetitive,  
+rule-based tasks.
+Creates content 
+based on prompts.
+Reaches goals  
+through decision- 
+making and action.
+Adapts through  
+experience and 
+feedback.
+Fully dependent on 
+pre-coded logic.
+Needs guidance  
+to operate.
+Acts with minimal 
+human input.
+
+--- PAGE 3 ---
+www.ixor.be
+1. From smart to autonomous
+Agentic AI enables systems that don’t wait for instructions, but proactively solve 
+problems, look up missing information, and adapt their behaviour based on feedback. 
+This opens the door to fully automated and optimized workflows. It also allows  
+multiple agents to collaborate, each with their own role, working together to solve 
+complex tasks.
+2. It changes how we build systems
+Instead of coding for every exception, we now design agents that simulate reasoning 
+and planning to make context-aware decisions in complex, real-world environments.
+These systems don’t follow rigid scripts, they adapt based on goals, feedback, and 
+new information.
+3. It’s more human-friendly 
+ 
+Agentic systems work with goals written in natural language, allowing users to  
+describe what they want, and developers to guide agent behaviour without  
+hardcoding rules.
+4. It unlocks new use cases
+From customer support agents that escalate only when needed, to systems that
+automate research, summarise lengthy documents, or coordinate tasks across 
+teams, the possibilities are growing fast.
+Why does it matter?
+
+--- PAGE 4 ---
+Why now?
+Recent innovations provide the components needed to build agentic systems that 
+are secure, scalable, and ready for production.
+At Ixor, we see Agentic AI as the next logical step in making technology more  
+useful, more proactive, and ultimately, more impactful.
+Who is Agentic AI for?
+• Decision-makers looking to boost efficiency, reduce  
+manual work, or unlock new digital services. Agentic AI 
+makes it possible to rethink internal workflows, customer  
+interactions, and business operations. 
+• Technical teams who want to build scalable, intelligent 
+systems that go beyond prototypes. Agentic AI offers the 
+frameworks to create production-ready, end-to-end  
+solutions, designed to be deployed, maintained, and  
+delivered to real customers. With fewer hard-coded rules 
+and more autonomy, these systems adapt, evolve, and 
+support practical use in real-world scenarios. 
+• Innovation leads and product owners exploring how AI  
+can take the next step beyond prediction or automation.  
+Agentic AI enables the shift from static tools to dynamic, 
+goal-driven digital assistants.
+What can Ixor do?
+At Ixor, we have already brought several Agentic AI 
+projects into production, and are currently working  
+on more.  
+ 
+This gives us a strong foundation of real-world  
+experience, not just theoretical knowledge.
+Our teams understand what works, where the pitfalls 
+are, and how to translate the promise of Agentic AI 
+into practical, scalable solutions.  
+ 
+Whether you’re exploring the potential or ready to 
+start building, we can help you move forward with 
+clarity and confidence.
+janpieter.cootjans@ixor.be 
++32 (0)475 20 57 67 
+www.ixor.be
+For any questions 
+about Agentic AI,  
+contact Jan Pieter 
+Cootjans, our  
+in-house expert. 
+digital impact created by talent
+In part 2 we will talk about
+Agentic AI en Privacy  (Autonomy vs.  
+Accountability). So stay tuned!
+
+
+FILE: impact_paper_3_trust_v230925.pdf
+SOURCE: https://cdn.prod.website-files.com/6412b48edc5e88a17ae7c2a0/68d282e93a79db2b54aa62a2_IXOR-COMMSTRAT-GRAPHIC-ONEPAGERS_IMPACTPAPER3_TRUSTv230925.pdf
+
+--- PAGE 1 ---
+digital impact created by talent
+What  
+Agentic AI  
+taught us.
+How to earn users’ trust  
+in autonomous systems
+Part 3
+Photo by ThisIsEngineering on Unsplash
+Copyright Ixor BV
+
+--- PAGE 2 ---
+Why trust matters
+Agentic AI can be smart, scalable, and autonomous, but it will fail without trust. No 
+matter how capable a system is, users won’t adopt it if they don’t feel comfortable 
+handing over control. Trust isn’t just a bonus; it’s the foundation for real-world adoption.
+As agents become more independent, the challenge changes: it’s no longer just about 
+proving that a system works, but showing it can be trusted. Without trust, even the 
+most advanced AI becomes shelfware. 
+Trust is what turns a working prototype into a daily tool. It’s what makes people  
+delegate tasks, rely on outcomes, and keep using the system - especially when they 
+don’t fully understand how it works.
+This Impact Paper explores how to build that trust through transparency, predictability, 
+and respectful design.
+www.ixor.be
+What we mean by trust
+In Agentic AI, trust is not only about the 
+agent itself, but also about the ecosystem 
+around it.
+Users feel safe when the agent provides 
+valid answers, not just socially acceptable 
+ones designed to please, but responses 
+that are genuinely useful and reliable.  
+ 
+Trust also grows when the interaction 
+feels natural and the agent clearly fits the 
+business context.
+Equally important is what happens behind 
+the scenes: the team and the architecture. 
+Knowing that experts have designed, 
+host, and monitor the system makes trust 
+sustainable.
+
+--- PAGE 3 ---
+www.ixor.be
+Why trust is harder in Agentic AI
+How to build trust into Agentic AI
+Agentic systems don’t just respond to input: they plan, take action, use tools,  
+and adapt. That flexibility is powerful, but also introduces complexity.
+Key challenges include:
+• Unpredictability: Small context changes can lead to very different outcomes.
+• Hidden decisions: Memory, tools, and intermediate steps happen behind the 
+scenes.
+• Lack of control: Users may not know how to intervene or redirect the agent.
+• Shifting behaviour: Learning systems may evolve in ways that confuse or unsettle 
+users.
+Classic software earns trust through reliability. Agentic AI must also manage  
+initiative and uncertainty, making the trust challenge more dynamic and nuanced.
+1. Be transparent, but relevant
+Don’t flood users with logs or token counts. Instead, offer timely, useful cues -  
+like what the agent plans to do next, or why it picked a certain path.
+2. Design for predictability
+Use consistent language, outputs, and flows. Predictable agents feel smarter  
+because they create less friction. Surprises break confidence.
+3. Respect boundaries
+Don’t assume consent. Confirm before high-impact actions. Let users pause, reverse, 
+or review what’s happening. Respect in design builds respect in use.
+4. Show confidence levels
+Let users know when the agent isn’t sure. Don’t fake confidence.
+5. Give users control points
+Autonomy doesn’t mean loss of control. Let users set boundaries, review actions,  
+or intervene. Giving people ways to steer makes the system feel safer, even if they  
+rarely use them.
+Through our experience building production-ready agents, and insights from the  
+experience, we recommend five core principles:
+
+--- PAGE 4 ---
+www.ixor.be
+What we learned about trust in agentic AI
+From our own projects we’ve seen what really shapes trust in agentic systems. These 
+lessons didn’t come from theory, but from building and deploying agents in practice.
+Honest answers build confidence
+Trust starts with what the agent says. People value agents that don’t fall back on 
+socially desirable answers but give honest, valid help they can use. Reliability beats 
+politeness.
+Agents can earn trust
+We noticed that trust was there when agents behaved consistently and delivered 
+useful results. It wasn’t automatic. Trust grew with every valid answer and every 
+helpful action.
+Humanity can trigger trust, but is hard to achieve
+A human touch makes a big difference. Tone, empathy and natural interaction styles 
+make systems approachable. But this is also where the most work is needed. Getting 
+“human” right is harder than it looks.
+The team behind the agent matters
+Trust is not just in the interface. It comes from the people who design, train and host 
+the system. Expertise and support structures give users confidence that the system 
+won’t fail them.
+Architecture matters. A fragile setup breaks trust quickly. But when systems are 
+secure, monitored and well designed, users feel safe to rely on them.
+Business context is key
+Agents must understand the business they serve. When they fit into existing 
+processes, use the right language and align with real goals, adoption is faster.  
+Trust in agentic AI never comes from one factor alone. It’s the mix of valid answers, 
+human-centred design, expert teams, solid architecture and business alignment that 
+makes people confident enough to rely on agents every day.
+
+--- PAGE 5 ---
+digital impact created by talent
+What can Ixor do?
+At Ixor, we have already brought several Agentic AI 
+projects into production, and are currently working  
+on more.  
+ 
+This gives us a strong foundation of real-world  
+experience, not just theoretical knowledge.
+Our teams understand what works, where the pitfalls 
+are, and how to translate the promise of Agentic AI 
+into practical, scalable solutions.  
+ 
+Whether you’re exploring the potential or ready to 
+start building, we can help you move forward with 
+clarity and confidence.  
+ 
+Want to explore this in your organisation?
+Book an Agentic AI Day. It’s a practical session to turn 
+AI ideas into action.
+More info here: ixor.be/agentic-ai-days
+janpieter.cootjans@ixor.be 
++32 (0)475 20 57 67 
+www.ixor.be
+For any questions 
+about Agentic AI,  
+contact Jan Pieter 
+Cootjans, our  
+in-house expert. 
+Not every process needs an agent. 
+ In our next Impact Paper, we’ll help you spot where Agentic AI adds value - and where it doesn’t.  
+We’ll share a practical checklist to help you identify the right use cases and assess the potential value  
+for your organisation.
+Conclusion: trust enables autonomy
+Agentic AI won’t win adoption because it’s smart. It will win because people feel safe 
+using it. That means designing systems that communicate clearly, act predictably, 
+and know when to pause, ask, or admit doubt. Trust isn’t a bonus feature. It’s the 
+intersection between autonomy and usability.
+
