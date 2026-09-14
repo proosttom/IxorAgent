@@ -1,0 +1,5 @@
+IXOR Impact Papers: trust in agentic AI
+
+- Trust in agentic AI depends on predictability, transparency, and human agency.
+- The right question is not whether an agent can act, but whether it can act safely and explainably.
+- Not every process needs an agent. Deterministic workflows often outperform flexible autonomous systems when clarity and control are required.
