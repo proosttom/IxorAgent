@@ -96,7 +96,14 @@ If you run the app without arguments, it enters an interactive loop and keeps as
 
 ```bash
 docker build -t ixor-crag-agent .
-docker run --rm ixor-crag-agent
+docker run --rm -p 8000:8000 \
+      -e IXOR_LLM_PROVIDER=local \
+      ixor-crag-agent
+
+curl http://localhost:8000/health
+curl -X POST http://localhost:8000/ask \
+      -H 'Content-Type: application/json' \
+      -d '{"question":"How is trust in AI earned?"}'
 ```
 
 This demo is designed to show a reliable, testable CRAG pattern: fetch only IXOR-relevant context, validate it, and answer with guardrails instead of unbounded generation.
