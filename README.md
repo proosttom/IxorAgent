@@ -26,6 +26,7 @@ A compact corrective RAG prototype built around IXOR's impact papers on trust, a
 - Relevance grading before generation
 - Query rewriting when evidence is weak
 - Safe fallback behavior when retries are exhausted
+- Optional grounded answer synthesis through an external small LLM
 
 ## Project layout
 
@@ -52,6 +53,25 @@ A compact corrective RAG prototype built around IXOR's impact papers on trust, a
 
 ```bash
 /usr/local/bin/python3 src/app.py "How can IXOR earn users' trust in agentic AI?"
+```
+
+By default, the app uses its deterministic local generator and does not need an API key. To enable Gemini for answer synthesis, install the requirements and configure:
+
+```bash
+export IXOR_LLM_PROVIDER=gemini
+export GEMINI_API_KEY="your-api-key"
+export IXOR_LLM_MODEL=gemini-2.0-flash
+/usr/local/bin/python3 src/app.py "How can IXOR earn users' trust in agentic AI?"
+```
+
+Retrieval and relevance grading remain local. Gemini receives only relevant retrieved excerpts, must cite their source filenames, and falls back to the deterministic generator if the provider is unavailable.
+
+Alternatively, place these settings in a local `.env` file. The file should not be committed:
+
+```dotenv
+IXOR_LLM_PROVIDER=gemini
+GEMINI_API_KEY=your-api-key
+IXOR_LLM_MODEL=gemini-2.0-flash
 ```
 
 You can pass any question as a command-line argument to query the IXOR corpus dynamically.

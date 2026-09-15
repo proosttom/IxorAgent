@@ -12,7 +12,13 @@ def mock_state() -> GraphState:
         "documents": [],
         "retry_count": 0,
         "generation": "",
+        "is_relevant": False,
     }
+
+
+@pytest.fixture(autouse=True)
+def disable_external_llm(monkeypatch):
+    monkeypatch.setenv("IXOR_LLM_PROVIDER", "local")
 
 
 def test_routing_to_rewrite_when_irrelevant(mock_state):
@@ -37,6 +43,29 @@ def test_retrieve_uses_ixor_corpus(mock_state):
 
     assert any("trust" in doc and "agentic ai" in doc for doc in normalized_docs)
     assert any("users" in doc and "trust" in doc for doc in normalized_docs)
+    assert all("chunk_id" in doc and "score" in doc for doc in result["documents"])
+
+
+def test_retrieval_prefers_source_diversity(mock_state):
+    mock_state["question"] = "how is trust in AI earned?"
+    result = retrieve(mock_state)
+
+    sources = [document["source"] for document in result["documents"]]
+
+    assert len(sources) == len(set(sources))
+
+
+def test_relevance_requires_retrieval_score(mock_state):
+    mock_state["documents"] = [
+        {
+            "page_content": "Trust in agentic AI depends on transparency.",
+            "score": 0.05,
+        }
+    ]
+
+    result = grade_documents(mock_state)
+
+    assert result["is_relevant"] is False
 
 
 def test_relevant_docs_route_to_generate(mock_state):
@@ -52,6 +81,21 @@ def test_relevant_docs_route_to_generate(mock_state):
     assert decide_to_generate(result) == "generate"
 
 
+def test_grade_documents_requires_meaningful_overlap(mock_state):
+    mock_state["question"] = "What does IXOR say about trust in gardening?"
+    mock_state["original_question"] = mock_state["question"]
+    mock_state["documents"] = [
+        {
+            "page_content": "IXOR explains that trust in agentic AI depends on transparency and predictability."
+        }
+    ]
+
+    result = grade_documents(mock_state)
+
+    assert result["is_relevant"] is False
+    assert decide_to_generate(result) == "rewrite_query"
+
+
 def test_generate_returns_polished_summary(mock_state):
     mock_state["documents"] = [
         {
@@ -62,6 +106,7 @@ def test_generate_returns_polished_summary(mock_state):
         },
     ]
     mock_state["question"] = "How can IXOR earn users' trust in agentic AI?"
+    mock_state["is_relevant"] = True
     result = generate(mock_state)
 
     assert "trust" in result["generation"].lower()
@@ -129,3 +174,37 @@ def test_bogus_question_falls_back_instead_of_generating():
 
     assert result["generation"].startswith("I couldn't find sufficient IXOR material")
     assert result["retry_count"] == 2
+
+
+def test_generation_remains_local_when_external_llm_is_disabled(
+    mock_state, monkeypatch
+):
+    monkeypatch.setenv("IXOR_LLM_PROVIDER", "local")
+    mock_state["documents"] = [
+        {
+            "page_content": "Trust in agentic AI depends on transparency and predictability."
+        }
+    ]
+    mock_state["is_relevant"] = True
+
+    result = generate(mock_state)
+
+    assert "transparency" in result["generation"].lower()
+
+
+def test_context_selection_preserves_source_and_limits_size():
+    from src.llm import _context
+
+    context = _context(
+        [
+            {
+                "source": "trust.txt",
+                "page_content": "Trust depends on transparency. " + ("Noise. " * 2_000),
+            }
+        ],
+        "How does trust depend on transparency?",
+    )
+
+    assert "[trust.txt]" in context
+    assert "Trust depends on transparency." in context
+    assert len(context) <= 8_000

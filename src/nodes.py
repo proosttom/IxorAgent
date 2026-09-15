@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import re
+from collections import Counter
 from typing import Any
 
 from pydantic import BaseModel, Field
 
+from src.llm import generate_with_llm
 from src.state import GraphState
 from src.vectorstore import get_vector_store
+
+MAX_RETRIES = 2
 
 
 class GradeDocuments(BaseModel):
@@ -16,31 +21,117 @@ class GradeDocuments(BaseModel):
     )
 
 
+_STOP_WORDS = {
+    "a",
+    "about",
+    "an",
+    "and",
+    "are",
+    "can",
+    "does",
+    "for",
+    "how",
+    "in",
+    "ixor",
+    "is",
+    "of",
+    "on",
+    "say",
+    "the",
+    "to",
+    "what",
+    "when",
+    "we",
+    "why",
+}
+_DOMAIN_TERMS = {
+    "accountability",
+    "agent",
+    "agentic",
+    "autonomy",
+    "deterministic",
+    "predictability",
+    "transparency",
+    "trust",
+}
+
+
+def _ensure_telemetry(state: GraphState) -> None:
+    state.setdefault(
+        "telemetry",
+        {"retrieval_steps": [], "relevance": {}, "llm": {}},
+    )
+
+
+def _record_local_llm(state: GraphState, context_chars: int) -> None:
+    state["telemetry"]["llm"] = {
+        "provider": "local",
+        "model": None,
+        "context_chars": context_chars,
+        "prompt_tokens": None,
+        "output_tokens": None,
+        "total_tokens": None,
+    }
+
+
+def _meaningful_tokens(text: str) -> set[str]:
+    normalized = text.lower().replace("’", "'")
+    return {
+        token
+        for token in re.findall(r"[a-z0-9']+", normalized)
+        if token not in _STOP_WORDS and len(token) > 1
+    }
+
+
 def retrieve(state: GraphState) -> GraphState:
+    _ensure_telemetry(state)
     vector_store = get_vector_store()
     state["documents"] = vector_store.search(state["question"], top_k=3)
+    state["telemetry"]["retrieval_steps"].append(
+        {
+            "query": state["question"],
+            "hits": [
+                {
+                    "source": document.get("source"),
+                    "chunk_id": document.get("chunk_id"),
+                    "score": document.get("score"),
+                }
+                for document in state["documents"]
+            ],
+        }
+    )
     return state
 
 
 def grade_documents(state: GraphState) -> GraphState:
-    question = state["original_question"].lower()
-    retrieved_text = "\n".join(
-        doc["page_content"].lower() for doc in state["documents"]
-    )
+    _ensure_telemetry(state)
+    question_tokens = _meaningful_tokens(state["original_question"])
+    relevant = False
 
-    relevant = (
-        ("trust" in question and "trust" in retrieved_text)
-        or ("agent" in question and "agentic" in retrieved_text)
-        or ("ixor" in question and "ixor" in retrieved_text.lower())
-    )
+    for document in state["documents"]:
+        document_tokens = _meaningful_tokens(document["page_content"])
+        overlap = question_tokens & document_tokens
+        retrieval_score = document.get("score", 1.0)
+
+        # Two meaningful shared terms provide a small but useful lexical signal.
+        # A single domain term is enough only for a very short, focused question.
+        if (len(overlap) >= 2 and retrieval_score >= 0.1) or (
+            len(question_tokens) == 1 and overlap.intersection(_DOMAIN_TERMS)
+        ):
+            relevant = True
+            break
 
     state["is_relevant"] = relevant
-    state["generation"] = "relevant" if relevant else "irrelevant"
+    state["generation"] = ""
+    state["telemetry"]["relevance"] = {
+        "is_relevant": relevant,
+        "question_terms": len(question_tokens),
+    }
     return state
 
 
 def decide_to_generate(state: GraphState) -> str:
-    if state["retry_count"] >= 2:
+    if state["retry_count"] >= MAX_RETRIES:
         return "fallback"
     if not state["documents"]:
         return "rewrite_query"
@@ -51,16 +142,28 @@ def decide_to_generate(state: GraphState) -> str:
 
 def rewrite_query(state: GraphState) -> GraphState:
     state["retry_count"] += 1
-    state["question"] = (
-        state["original_question"] + " focus on IXOR trust and AI decision-making"
-    )
+    state["question"] = state["original_question"] + " IXOR impact papers"
     return state
 
 
 def generate(state: GraphState) -> GraphState:
+    _ensure_telemetry(state)
+    if not state["documents"] or state.get("is_relevant") is not True:
+        return fallback(state)
+
+    llm_answer = generate_with_llm(
+        state["original_question"], state["documents"]
+    )
+    if llm_answer:
+        state["generation"] = llm_answer["answer"]
+        state["telemetry"]["llm"] = {
+            key: value for key, value in llm_answer.items() if key != "answer"
+        }
+        return state
+
     combined = "\n\n".join(doc["page_content"] for doc in state["documents"])
     text = combined.lower()
-    question = state["question"].lower()
+    question = state["original_question"].lower()
 
     # Prioritize the theme implied by the current question instead of blending every
     # retrieval result into the same answer.
@@ -70,6 +173,7 @@ def generate(state: GraphState) -> GraphState:
             "The idea is that autonomy is valuable only when it is paired with governance, ethical guardrails, and business-aligned control."
         )
         state["generation"] = summary
+        _record_local_llm(state, len(combined))
         return state
 
     if (
@@ -82,6 +186,7 @@ def generate(state: GraphState) -> GraphState:
             "Agents should explain what they plan to do, give users control points, and behave consistently so users feel safe delegating decisions."
         )
         state["generation"] = summary
+        _record_local_llm(state, len(combined))
         return state
 
     pieces: list[str] = []
@@ -116,6 +221,7 @@ def generate(state: GraphState) -> GraphState:
         else "IXOR’s guidance is that trustworthy agentic AI depends on clarity, safe boundaries, and human oversight."
     )
     state["generation"] = summary
+    _record_local_llm(state, len(combined))
     return state
 
 

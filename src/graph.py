@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from src.nodes import (
+    MAX_RETRIES,
     decide_to_generate,
     fallback,
     generate,
@@ -19,6 +20,11 @@ def run_agent(question: str) -> GraphState:
         "retry_count": 0,
         "generation": "",
         "is_relevant": False,
+        "telemetry": {
+            "retrieval_steps": [],
+            "relevance": {},
+            "llm": {},
+        },
     }
 
     state = retrieve(state)
@@ -30,7 +36,7 @@ def run_agent(question: str) -> GraphState:
             state = generate(state)
             break
         if route == "rewrite_query":
-            if state["retry_count"] >= 2:
+            if state["retry_count"] >= MAX_RETRIES:
                 state = fallback(state)
                 break
             state = rewrite_query(state)

@@ -8,3 +8,4 @@ class GraphState(TypedDict):
     retry_count: int
     generation: str
     is_relevant: bool
+    telemetry: Dict[str, Any]

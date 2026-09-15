@@ -1,5 +1,7 @@
 pytest
 pydantic
+python-dotenv>=1.0,<2
 langchain-core
 langchain-community
 faiss-cpu
+google-genai>=1.0,<2
