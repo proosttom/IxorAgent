@@ -43,6 +43,12 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+def root() -> dict[str, str]:
+    # Avoids 404 noise in logs from platform pings and browser visits to "/".
+    return {"service": "ixor-agent", "docs": "/docs", "health": "/health"}
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "ixor-agent"}
