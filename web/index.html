@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IxorAgent Demo</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --border: #d0d0d8;
+    --muted: #666;
+    --accent: #2b5fd9;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 760px;
+    margin: 2.5rem auto;
+    padding: 0 1.25rem;
+    line-height: 1.5;
+  }
+  h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+  }
+  p.subtitle {
+    color: var(--muted);
+    margin-top: 0;
+  }
+  form {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  button {
+    padding: 0.6rem 1.1rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  #status {
+    color: var(--muted);
+    font-size: 0.9rem;
+    min-height: 1.2rem;
+  }
+  #answer {
+    white-space: pre-wrap;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+  details {
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: none;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  pre {
+    overflow-x: auto;
+    background: rgba(127, 127, 127, 0.08);
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+  .example-questions {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .example-questions button {
+    background: none;
+    color: var(--accent);
+    padding: 0;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    margin-right: 0.75rem;
+  }
+</style>
+</head>
+<body>
+  <h1>IxorAgent Demo</h1>
+  <p class="subtitle">Ask a question about IXOR's public impact papers on trust and agentic AI.</p>
+
+  <form id="ask-form">
+    <input
+      id="question"
+      type="text"
+      placeholder="How is trust in AI earned?"
+      autocomplete="off"
+      required
+    />
+    <button id="submit-btn" type="submit">Ask</button>
+  </form>
+
+  <div class="example-questions">
+    Try:
+    <button type="button" data-question="How is trust in AI earned?">trust</button>
+    <button type="button" data-question="What is IXOR's view on autonomy vs accountability?">autonomy</button>
+    <button type="button" data-question="When should an organization avoid using an agent?">deterministic vs agent</button>
+  </div>
+
+  <div id="status"></div>
+  <div id="answer"></div>
+  <details id="telemetry-panel">
+    <summary>Execution details</summary>
+    <pre id="telemetry"></pre>
+  </details>
+
+  <script src="config.js"></script>
+  <script>
+    // Falls back to localhost if config.js is missing (e.g. local file preview).
+    const API_URL = window.IXOR_API_URL || "http://localhost:8000";
+
+    const form = document.getElementById("ask-form");
+    const input = document.getElementById("question");
+    const submitBtn = document.getElementById("submit-btn");
+    const statusEl = document.getElementById("status");
+    const answerEl = document.getElementById("answer");
+    const telemetryPanel = document.getElementById("telemetry-panel");
+    const telemetryEl = document.getElementById("telemetry");
+
+    document.querySelectorAll(".example-questions button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        input.value = btn.dataset.question;
+        form.requestSubmit();
+      });
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      submitBtn.disabled = true;
+      statusEl.textContent = "Asking IxorAgent...";
+      answerEl.style.display = "none";
+      telemetryPanel.style.display = "none";
+
+      try {
+        const response = await fetch(`${API_URL}/ask`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, verbose: true }),
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.detail || `Request failed (${response.status})`);
+        }
+
+        const data = await response.json();
+        answerEl.textContent = data.answer;
+        answerEl.style.display = "block";
+        telemetryEl.textContent = JSON.stringify(data.telemetry, null, 2);
+        telemetryPanel.style.display = "block";
+        statusEl.textContent = "";
+      } catch (error) {
+        statusEl.textContent = `Error: ${error.message}`;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
