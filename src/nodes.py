@@ -55,6 +55,19 @@ _DOMAIN_TERMS = {
     "trust",
 }
 
+# Expands a recognized domain term toward corpus vocabulary it co-occurs with,
+# so retries search for related concepts instead of repeating the same query.
+_DOMAIN_SYNONYMS: dict[str, list[str]] = {
+    "trust": ["transparency", "predictability", "respectful", "reliability"],
+    "transparency": ["trust", "explain", "predictability"],
+    "predictability": ["consistent", "trust", "reliability"],
+    "autonomy": ["accountability", "boundaries", "oversight"],
+    "accountability": ["autonomy", "oversight", "responsibility"],
+    "agent": ["agentic", "automation", "deterministic"],
+    "agentic": ["agent", "autonomous", "automation"],
+    "deterministic": ["agent", "automation", "workflow"],
+}
+
 
 def _ensure_telemetry(state: GraphState) -> None:
     state.setdefault(
@@ -86,7 +99,10 @@ def _meaningful_tokens(text: str) -> set[str]:
 def retrieve(state: GraphState) -> GraphState:
     _ensure_telemetry(state)
     vector_store = get_vector_store()
-    state["documents"] = vector_store.search(state["question"], top_k=3)
+    # Widen the candidate pool on retries instead of re-running the same
+    # narrow search that already failed to find relevant evidence.
+    top_k = 3 + 2 * state.get("retry_count", 0)
+    state["documents"] = vector_store.search(state["question"], top_k=top_k)
     state["telemetry"]["retrieval_steps"].append(
         {
             "query": state["question"],
@@ -142,7 +158,40 @@ def decide_to_generate(state: GraphState) -> str:
 
 def rewrite_query(state: GraphState) -> GraphState:
     state["retry_count"] += 1
-    state["question"] = state["original_question"] + " IXOR impact papers"
+    attempt = state["retry_count"]
+
+    original_tokens = _meaningful_tokens(state["original_question"])
+    domain_hits = sorted(original_tokens & _DOMAIN_TERMS)
+
+    if domain_hits:
+        # Expand recognized domain terms toward related corpus vocabulary.
+        # Later attempts pull in a wider set of synonyms instead of repeating
+        # the exact same expansion as the previous retry.
+        expansions: list[str] = []
+        for term in domain_hits:
+            expansions.extend(_DOMAIN_SYNONYMS.get(term, []))
+        unique_expansions = list(dict.fromkeys(expansions))
+        take = (
+            len(unique_expansions)
+            if attempt >= 2
+            else max(2, len(unique_expansions) // 2)
+        )
+        extra = " ".join(unique_expansions[:take])
+    else:
+        # No recognized domain term: broaden with a different generic hint
+        # per attempt so retries explore different parts of the corpus.
+        extra = (
+            "trust transparency predictability agentic AI"
+            if attempt == 1
+            else "autonomy accountability deterministic automation"
+        )
+
+    new_question = f"{state['original_question']} {extra}".strip()
+    if new_question == state["question"]:
+        # Guard against a no-op rewrite when expansion is empty or unchanged.
+        new_question = f"{new_question} IXOR"
+
+    state["question"] = new_question
     return state
 
 
@@ -151,9 +200,7 @@ def generate(state: GraphState) -> GraphState:
     if not state["documents"] or state.get("is_relevant") is not True:
         return fallback(state)
 
-    llm_answer = generate_with_llm(
-        state["original_question"], state["documents"]
-    )
+    llm_answer = generate_with_llm(state["original_question"], state["documents"])
     if llm_answer:
         state["generation"] = llm_answer["answer"]
         state["telemetry"]["llm"] = {

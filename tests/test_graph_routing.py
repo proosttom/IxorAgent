@@ -1,6 +1,12 @@
 import pytest
 
-from src.nodes import decide_to_generate, generate, grade_documents, retrieve
+from src.nodes import (
+    decide_to_generate,
+    generate,
+    grade_documents,
+    retrieve,
+    rewrite_query,
+)
 from src.state import GraphState
 
 
@@ -208,3 +214,38 @@ def test_context_selection_preserves_source_and_limits_size():
     assert "[trust.txt]" in context
     assert "Trust depends on transparency." in context
     assert len(context) <= 8_000
+
+
+def test_rewrite_query_differs_across_consecutive_retries(mock_state):
+    mock_state["question"] = "How is trust earned?"
+    mock_state["original_question"] = "How is trust earned?"
+
+    first = rewrite_query(dict(mock_state))
+    second = rewrite_query(dict(first))
+
+    assert first["question"] != second["question"]
+    assert second["retry_count"] == 2
+
+
+def test_rewrite_query_expands_recognized_domain_terms(mock_state):
+    mock_state["question"] = "How is trust earned?"
+    mock_state["original_question"] = "How is trust earned?"
+
+    result = rewrite_query(mock_state)
+
+    assert result["question"] != "How is trust earned? IXOR impact papers"
+    assert any(
+        term in result["question"].lower()
+        for term in ("transparency", "predictability", "reliability", "respectful")
+    )
+
+
+def test_retrieve_widens_top_k_on_retries(mock_state):
+    mock_state["question"] = "trust"
+    mock_state["retry_count"] = 0
+    first_pass = retrieve(dict(mock_state))
+
+    mock_state["retry_count"] = 1
+    second_pass = retrieve(dict(mock_state))
+
+    assert len(second_pass["documents"]) >= len(first_pass["documents"])
