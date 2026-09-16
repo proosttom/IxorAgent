@@ -6,3 +6,7 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+node_modules/
+web/dist/
+web/public/app.js
+web/public/app.js.map

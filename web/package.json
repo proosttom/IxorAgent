@@ -1,0 +1,28 @@
+{
+  "name": "ixor-agent-web",
+  "version": "1.0.0",
+  "description": "Node.js/Express + TypeScript frontend and API proxy for the IxorAgent CRAG demo, styled after ixor.be.",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.client.json",
+    "start": "npm run build && node dist/server.js",
+    "dev": "npm run build && node --watch dist/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IxorAgent — Ask the IXOR Impact Papers</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="topbar">
+    Node.js-powered demo &nbsp;·&nbsp; <a href="https://www.ixor.be/impact-papers" target="_blank" rel="noopener">Read the IXOR impact papers</a>
+  </div>
+
+  <header class="site-header">
+    <div class="wordmark">ixor<span class="dot">agent</span></div>
+    <nav>
+      <a href="https://www.ixor.be/" target="_blank" rel="noopener">ixor.be</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Ask IXOR's impact papers</h1>
+      <p class="subtitle">
+        A corrective retrieval-augmented demo grounded in IXOR's public writing on
+        trust, autonomy, and agentic AI.
+      </p>
+
+      <form id="ask-form">
+        <input
+          id="question"
+          type="text"
+          placeholder="How is trust in AI earned?"
+          autocomplete="off"
+          required
+        />
+        <button id="submit-btn" type="submit">ASK</button>
+      </form>
+
+      <div class="example-questions">
+        <span>Try:</span>
+        <button type="button" class="chip" data-question="How is trust in AI earned?">trust</button>
+        <button type="button" class="chip" data-question="What is IXOR's view on autonomy vs accountability?">autonomy</button>
+        <button type="button" class="chip" data-question="When should an organization avoid using an agent?">deterministic vs agent</button>
+      </div>
+    </section>
+
+    <section class="result-section">
+      <div id="status"></div>
+      <div id="answer-card" class="card">
+        <div id="answer"></div>
+      </div>
+      <details id="telemetry-panel" class="card">
+        <summary>Execution details</summary>
+        <pre id="telemetry"></pre>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p>Demo built on IXOR's public impact papers. Not an official IXOR product.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,5 +1,13 @@
 [build]
-  publish = "web"
+  base = "web"
+  publish = "public"
+  functions = "netlify/functions"
+  command = "npm install && npm run build"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
 
 [[headers]]
   for = "/*"

@@ -43,6 +43,10 @@ A compact corrective RAG prototype built around IXOR's impact papers on trust, a
 │   └── vectorstore.py
 ├── tests/
 │   └── test_graph_routing.py
+├── web/                      # Node.js/Express frontend, styled after ixor.be
+│   ├── server.js
+│   ├── public/
+│   └── netlify/functions/
 ├── Dockerfile
 ├── requirements.txt
 ├── pytest.ini
@@ -105,5 +109,28 @@ curl -X POST http://localhost:8000/ask \
       -H 'Content-Type: application/json' \
       -d '{"question":"How is trust in AI earned?"}'
 ```
+
+## Web frontend (Node.js/Express + TypeScript)
+
+A small Express server, written in TypeScript, serves an IXOR-styled UI and proxies `/api/ask` and `/api/health` to the Python API, so the browser never talks to the backend directly.
+
+```bash
+cd web
+npm install
+cp .env.example .env   # set IXOR_API_URL to your deployed Python API
+npm run build           # compiles src/*.ts -> dist/ and src/client/app.ts -> public/app.js
+node dist/server.js
+```
+
+`npm start` and `npm run dev` both build first, then run the compiled server.
+node server.js
+```
+
+Open `http://localhost:3000`. The page shows the answer plus a collapsible **Execution details** panel with retrieval hits, relevance, provider/model, and token usage.
+
+The same Express app can deploy as:
+
+- A standalone Node service (Render, Railway, Fly.io), or
+- Netlify Functions (`web/netlify/functions/api.js` + `netlify.toml`, using your existing Netlify account).
 
 This demo is designed to show a reliable, testable CRAG pattern: fetch only IXOR-relevant context, validate it, and answer with guardrails instead of unbounded generation.
