@@ -2,12 +2,17 @@
 
 ## Overview
 
-IxorAgent is a corrective retrieval-augmented generation application over IXOR impact papers. It combines deterministic local retrieval and routing with optional Gemini answer synthesis.
+IxorAgent is a corrective retrieval-augmented generation application that serves two demos from one codebase:
+
+- `ixor_papers`: Q&A over IXOR's public impact papers.
+- `cv_job_fit`: comparing Tom Proost's CV against the ixor.be "LLM and Agentic AI Engineer" job posting (fit, gaps, caveats).
+
+Both combine deterministic local retrieval and routing with optional Gemini answer synthesis, differing only by a small per-corpus `AgentProfile` (see `src/profiles.py`).
 
 The system is designed to be understandable during a demo:
 
-- Evidence is retrieved locally from the IXOR corpus.
-- Evidence is graded before generation.
+- Evidence is retrieved locally from the selected corpus.
+- Evidence is graded before generation, with an optional LLM second opinion.
 - Weak evidence triggers bounded query rewriting.
 - Unsupported questions receive a fallback response.
 - Execution details are shown beside the answer.
@@ -77,11 +82,30 @@ retry_count       Number of rewrite attempts
 generation        Final answer text
 is_relevant       Relevance gate result
 telemetry         Retrieval, grading, provider, and token metadata
+corpus            Which corpus/profile to use ("ixor_papers" | "cv_job_fit")
 ```
+
+### `src/profiles.py`
+
+Defines `AgentProfile`, the per-corpus configuration that keeps `nodes.py`/`llm.py` corpus-agnostic:
+
+```text
+corpus              corpus/data directory key
+domain_terms        topical vocabulary used by the relevance gate
+domain_synonyms     expansion terms used by query rewriting
+rewrite_hints       generic hints for retry attempt 1 / attempt >=2
+llm_instruction     prompt style passed to Gemini generation
+fallback_message    safe response when evidence is insufficient
+min_overlap_terms   overlapping terms required for a lexical relevance match
+broad_domain_match  accept any domain-term hit regardless of question length
+use_llm_grading     ask Gemini for a second opinion when the lexical gate rejects
+```
+
+`get_profile(corpus)` returns the matching profile, defaulting to `ixor_papers`.
 
 ### `src/vectorstore.py`
 
-Loads the local IXOR text corpus, splits papers into overlapping chunks, computes token metadata, and returns source-diverse top-k matches with scores.
+Loads a local text corpus, splits papers into overlapping chunks, computes token metadata, and returns source-diverse top-k matches with scores. Stores are cached per corpus by `get_vector_store(corpus)`, keyed against `CORPUS_DIRS` (`data/ixor_papers`, `data/cv_job_fit`).
 
 Each retrieved result contains:
 
@@ -97,12 +121,12 @@ score
 
 Contains the graph nodes:
 
-- `retrieve`: searches the current query.
-- `grade_documents`: evaluates evidence against the original question.
+- `retrieve`: searches the current query against the state's corpus.
+- `grade_documents`: evaluates evidence against the original question using the corpus's `AgentProfile`; when the lexical check rejects and `use_llm_grading` is set, asks the LLM for a second opinion before giving up.
 - `decide_to_generate`: selects generation, rewrite, or fallback.
-- `rewrite_query`: adds a neutral IXOR corpus hint and increments retries.
-- `generate`: delegates to Gemini when available or uses local deterministic synthesis.
-- `fallback`: returns a safe response when evidence is insufficient.
+- `rewrite_query`: expands recognized domain terms (or a generic hint) and increments retries.
+- `generate`: delegates to Gemini when available; otherwise uses the IXOR-specific canned local synthesis for `ixor_papers`, or a generic extractive sentence-ranking fallback for other corpora.
+- `fallback`: returns the profile's safe response when evidence is insufficient.
 
 ### `src/llm.py`
 
@@ -110,22 +134,26 @@ Optional Gemini integration. It:
 
 1. Selects relevant sentences from retrieved chunks.
 2. Caps context size.
-3. Sends a grounded prompt to Gemini.
+3. Sends a grounded prompt to Gemini, using the active profile's instruction text.
 4. Rejects incomplete or truncated responses.
 5. Returns provider and usage metadata.
 6. Falls back to local generation when unavailable.
 
+It also exposes `grade_relevance_with_llm()`, a bounded structured-output call (`GradeDocuments` schema, low token cap, no thinking budget) used as the second-opinion relevance check described above.
+
 ## Retrieval Design
 
-The corpus is indexed in memory at process startup. Papers are divided into overlapping chunks to improve evidence precision. Search uses token overlap and returns source-diverse results so one paper does not occupy every result slot.
+Each corpus is indexed in memory on first use and cached per corpus name. Papers are divided into overlapping chunks to improve evidence precision. Search uses token overlap and returns source-diverse results so one paper does not occupy every result slot.
 
-The current scoring function is intentionally lightweight. It is appropriate for the small demo corpus but can later be replaced by an embedding index without changing the graph contract.
+The current scoring function is intentionally lightweight. It is appropriate for the small demo corpora but can later be replaced by an embedding index without changing the graph contract.
 
 ## Relevance Design
 
-Relevance is a local safety gate, not an LLM decision. A document is accepted when it has enough meaningful overlap with the original question and meets the retrieval score threshold.
+Relevance is primarily a local, deterministic safety gate: a document is accepted when it has enough meaningful token overlap with the original question (a naive stemmer matches plurals like "caveats" against domain terms like "caveat") and meets the retrieval score threshold.
 
 This protects against a rewritten query making a bogus question appear relevant. For example, `X` remains unsupported even after a retry adds corpus terms.
+
+For narrow, single-topic corpora (`cv_job_fit`), the profile loosens this gate — a single domain-term hit is enough evidence (`broad_domain_match`) — and, when the lexical check still rejects the question, `grade_relevance_with_llm()` gives the LLM a bounded, context-grounded second opinion before falling back. This rescues naturally phrased questions ("would you hire this person?") that share no literal wording with the corpus, while still rejecting genuinely unrelated questions.
 
 ## Generation Design
 
@@ -158,6 +186,7 @@ retrieval_steps
 relevance
   is_relevant
   question_terms
+  graded_by      "lexical" or "llm"
 
 llm
   provider
@@ -170,6 +199,8 @@ llm
 ```
 
 The CLI renders this trace next to the answer. API keys are not included in state or output.
+
+Each `/ask` request also logs a structured stdout line (`request_id`, `corpus`, `latency_ms`, `relevant`, `question`) from `src/server.py`. Question text is logged by default; set `IXOR_LOG_QUESTIONS=false` to redact it.
 
 ## Failure Handling
 
@@ -202,20 +233,28 @@ IXOR_LLM_MODEL=gemini-2.5-flash
 
 If `GEMINI_API_KEY` is present and no provider is explicitly configured, the application selects Gemini automatically.
 
+Request logging is configurable independently of the LLM provider:
+
+```dotenv
+IXOR_LOG_QUESTIONS=true   # default; set false to redact question text in logs
+IXOR_LOG_LEVEL=INFO
+```
+
 ## Validation Strategy
 
 The test suite validates:
 
-- Retrieval and chunk metadata.
+- Retrieval and chunk metadata, per corpus.
 - Source diversity.
-- Score-aware relevance.
+- Score-aware relevance, including the `cv_job_fit` broadened gate and plural domain-term stemming.
 - Rewrite and fallback routing.
 - Protection against bogus questions.
 - Topic-specific answer differences.
-- Local generation without credentials.
+- Local generation without credentials, including the generic extractive fallback for non-IXOR corpora.
 - Bounded context selection.
+- API validation of the `corpus` field (invalid values rejected).
 
-Live Gemini requests are manual integration checks. Unit tests force local mode to remain deterministic and avoid network or credential dependencies.
+Live Gemini requests (generation and LLM-based relevance grading) are manual integration checks. Unit tests force local mode to remain deterministic and avoid network or credential dependencies.
 
 ## Extension Points
 
@@ -227,3 +266,4 @@ The design supports future improvements without changing the CLI or graph contra
 - Expose telemetry as structured JSON or metrics.
 - Add conversation history and follow-up question handling.
 - Add a benchmark set for retrieval and answer grounding.
+- Add further corpora/profiles beyond `ixor_papers` and `cv_job_fit`.

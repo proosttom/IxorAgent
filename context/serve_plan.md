@@ -207,21 +207,22 @@ The service should assume that a public endpoint will be probed with malformed a
 
 ## Observability
 
-Extend telemetry with:
+Implemented in `src/server.py`: every `/ask` request logs one structured stdout line via Python's `logging` module:
 
 ```text
-request_id
-started_at
-retrieval_latency_ms
-llm_latency_ms
-total_latency_ms
-http_status
-error_type
+ask request_id=<uuid> corpus=<corpus> latency_ms=<ms> relevant=<bool> question=<text|"<redacted>">
 ```
 
-Do not record the API key or full prompts in normal logs. Question logging should be configurable because questions may contain personal or confidential information.
+Configuration:
 
-For a first demo, structured stdout logs are sufficient. A hosted platform can collect those logs without adding a separate observability service.
+```dotenv
+IXOR_LOG_QUESTIONS=true   # default; set false to redact question text
+IXOR_LOG_LEVEL=INFO
+```
+
+Question text is logged by default for demo visibility, but stays configurable because the `cv_job_fit` corpus involves personal CV content — set `IXOR_LOG_QUESTIONS=false` before sharing a URL where that's a concern. Failures are logged with `logger.exception(...)`, keeping stack traces out of the HTTP response.
+
+For a first demo, these structured stdout logs are sufficient — a hosted platform (e.g. Render's Logs tab) collects them without adding a separate observability service. Future extensions could add `retrieval_latency_ms` / `llm_latency_ms` breakdowns or stream logs to an external sink for longer retention and search.
 
 ## Error Handling
 

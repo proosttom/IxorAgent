@@ -9,21 +9,21 @@ This complements `serve_plan.md` (Python API deployment) and `design.md` (RAG ar
 ## Architecture
 
 ```text
-Browser (IXOR-styled UI)
+Browser (IXOR-styled UI, two ask bars on one page)
         |
         v
 Node.js / Express (TypeScript)
   web/src/server.ts
         |
         +--> GET  /api/health  --> proxies to Python API /health
-        +--> POST /api/ask     --> proxies to Python API /ask
+        +--> POST /api/ask     --> proxies to Python API /ask ({ question, corpus })
         |
         v
 Python FastAPI service (Render)
-  src/server.py -> run_agent()
+  src/server.py -> run_agent(question, corpus)
         |
-        +--> local IXOR chunk retrieval
-        +--> local relevance grading
+        +--> per-corpus chunk retrieval (ixor_papers | cv_job_fit)
+        +--> local + optional LLM-assisted relevance grading
         +--> optional Gemini synthesis
         +--> execution telemetry
 ```
@@ -44,11 +44,11 @@ The browser never talks to the Python API directly. The Node layer is a thin, sa
 web/
 ├── src/
 │   ├── server.ts          # Express app: static hosting + /api/* proxy
-│   ├── types.ts           # Shared request/response contracts
+│   ├── types.ts           # Shared request/response contracts (incl. corpus)
 │   └── client/
-│       └── app.ts         # Browser script (compiled to public/app.js)
+│       └── app.ts         # bindAskForm() helper, bound twice (ixor_papers, cv_job_fit)
 ├── public/
-│   ├── index.html         # IXOR-styled landing page
+│   ├── index.html         # IXOR-styled landing page, two ask bars
 │   └── style.css
 ├── netlify/
 │   └── functions/
@@ -94,16 +94,20 @@ Proxies to the Python `/health` endpoint. Returns `503` with a synthetic body if
 Request:
 
 ```json
-{ "question": "How is trust in AI earned?" }
+{ "question": "How is trust in AI earned?", "corpus": "ixor_papers" }
 ```
 
-Validation performed in Node before proxying:
+`corpus` defaults to `"ixor_papers"` when omitted; the second ask bar on the page sends `"cv_job_fit"`. Validation performed in Node before proxying:
 
 - Rejects empty/whitespace-only questions (`400`).
 - Rejects questions over 1,000 characters (`413`).
 - Rate-limited to 20 requests/minute per client (`429` via `express-rate-limit`).
 
 Response is passed through from the Python API unchanged, so the frontend always renders the same `answer` + `telemetry` shape documented in `design.md`.
+
+## Two Demos, One Page
+
+`public/index.html` has two independent sections, each with its own form/input/button/answer/telemetry ids (`ask-form`/`ask-form-fit`, `question`/`question-fit`, etc.). `client/app.ts` defines a single `bindAskForm(config)` helper that wires up submit handling, chip buttons, and rendering; it's invoked twice with different `corpus` values and DOM ids, so both ask bars share identical client logic without duplicating the fetch/render code.
 
 ## TypeScript Usage
 
