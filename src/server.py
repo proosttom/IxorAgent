@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 import os
+import time
 from typing import Any, Literal
 from uuid import uuid4
 
@@ -11,6 +13,12 @@ from pydantic import BaseModel, Field
 from src.graph import run_agent
 
 MAX_QUESTION_LENGTH = 1_000
+
+logging.basicConfig(level=os.getenv("IXOR_LOG_LEVEL", "INFO"))
+logger = logging.getLogger("ixor_agent")
+# On by default for demo visibility; set IXOR_LOG_QUESTIONS=false to redact
+# question text if it may contain personal or confidential information.
+LOG_QUESTIONS = os.getenv("IXOR_LOG_QUESTIONS", "true").lower() == "true"
 
 
 class AskRequest(BaseModel):
@@ -62,9 +70,13 @@ def ask(request: AskRequest) -> AskResponse:
         raise HTTPException(status_code=400, detail="Question must not be empty.")
 
     request_id = str(uuid4())
+    started_at = time.perf_counter()
     try:
         state = run_agent(question, corpus=request.corpus)
     except Exception:
+        logger.exception(
+            "ask failed request_id=%s corpus=%s", request_id, request.corpus
+        )
         raise HTTPException(
             status_code=500,
             detail="The agent could not process this request.",
@@ -72,6 +84,17 @@ def ask(request: AskRequest) -> AskResponse:
 
     telemetry = dict(state["telemetry"])
     telemetry["request_id"] = request_id
+
+    latency_ms = round((time.perf_counter() - started_at) * 1000, 1)
+    logger.info(
+        "ask request_id=%s corpus=%s latency_ms=%s relevant=%s question=%s",
+        request_id,
+        request.corpus,
+        latency_ms,
+        telemetry.get("relevance", {}).get("is_relevant"),
+        question if LOG_QUESTIONS else "<redacted>",
+    )
+
     if not request.verbose:
         telemetry = {
             "request_id": request_id,
