@@ -12,7 +12,7 @@ from src.nodes import (
 from src.state import GraphState
 
 
-def run_agent(question: str) -> GraphState:
+def run_agent(question: str, corpus: str = "ixor_papers") -> GraphState:
     state: GraphState = {
         "question": question,
         "original_question": question,
@@ -25,6 +25,7 @@ def run_agent(question: str) -> GraphState:
             "relevance": {},
             "llm": {},
         },
+        "corpus": corpus,
     }
 
     state = retrieve(state)

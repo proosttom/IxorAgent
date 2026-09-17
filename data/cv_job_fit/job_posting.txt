@@ -1,0 +1,47 @@
+Title: Ixor Job Posting - LLM and Agentic AI Engineer
+
+Your role
+
+As an LLM and Agentic AI Engineer you work in Ixor's AI team. At Ixor we build
+software that makes a difference, from the Flemish Traffic Centre to smart
+energy managers. We are heavily involved in custom AI applications and are
+looking for a developer with a few years of experience who wants to grow along
+in the agentic AI era.
+
+You work in a small, experienced team on concrete AI products: from prompt
+engineering and RAG pipelines to autonomous agents that carry out tasks
+independently. You not only build smart models, you also build the robust
+Java, NodeJs or Python backend and cloud infrastructure around them.
+
+Responsibilities
+- Develop AI systems from concept to production
+- Integrate LLM models (OpenAI, Anthropic, Azure AI, ...)
+- Translate customer problems into the right technology choices: RAG,
+  multi-agent architectures, fine-tuning, ...
+- Design and manage cloud infrastructure on AWS or Azure
+- Write robust, testable code and take part in code reviews
+- Contribute to architecture decisions together with senior developers
+- Learn quickly and share knowledge via internal tech talks and our annual
+  workation
+
+Your profile
+- Master's degree in computer science, applied informatics, or equivalent
+  experience
+- A passion for technology, combined with a strong drive to keep learning
+- Experience with Python or TypeScript
+- Curious about new developments in AI, with practical experience with LLMs or
+  agentic AI
+- Basic knowledge of cloud platforms (AWS or Azure); certifications are a
+  plus, not a requirement
+- Knowledge of Object-Oriented Programming (OOP)
+- Experience with frameworks such as LangGraph, AutoGen, ...
+- Enjoys working in a small team where you quickly get responsibility
+- Fluent communication in Dutch; English is the working language for
+  technical documentation
+
+Our approach
+- At Ixor we work Agile, using the Lean Startup method with short, effective
+  development phases
+- Continuous learning
+- Teamwork
+- De juiste technologische keuzes

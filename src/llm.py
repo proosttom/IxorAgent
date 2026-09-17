@@ -71,7 +71,7 @@ def _context(documents: list[dict[str, Any]], question: str) -> str:
 
 
 def generate_with_llm(
-    question: str, documents: list[dict[str, Any]]
+    question: str, documents: list[dict[str, Any]], profile: Any = None
 ) -> dict[str, Any] | None:
     """Generate a grounded answer when the optional external provider is enabled."""
     provider = os.getenv("IXOR_LLM_PROVIDER")
@@ -83,6 +83,16 @@ def generate_with_llm(
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return None
+
+    instruction = (
+        profile.llm_instruction
+        if profile is not None
+        else (
+            "Answer only from these IXOR excerpts. Use 2-4 complete sentences, "
+            "maximum 120 words. Cite source filenames in square brackets and "
+            "do not invent facts."
+        )
+    )
 
     try:
         from google import genai
@@ -96,11 +106,9 @@ def generate_with_llm(
         response = client.models.generate_content(
             model=os.getenv("IXOR_LLM_MODEL", DEFAULT_MODEL),
             contents=(
-                "Answer only from these IXOR excerpts. Use 2-4 complete sentences, "
-                "maximum 120 words. Cite source filenames in square brackets and "
-                "do not invent facts.\n\n"
+                f"{instruction}\n\n"
                 f"Question: {question}\n\n"
-                f"IXOR source excerpts:\n{context}"
+                f"Source excerpts:\n{context}"
             ),
             config=types.GenerateContentConfig(
                 temperature=0,

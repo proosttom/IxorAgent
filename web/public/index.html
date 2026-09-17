@@ -55,10 +55,49 @@
         <pre id="telemetry"></pre>
       </details>
     </section>
+
+    <hr class="section-divider" />
+
+    <section class="hero">
+      <h1>Ask: Resume vs job posting fit</h1>
+      <p class="subtitle">
+        A second demo over the same corrective RAG pipeline: compare Tom Proost's resume
+        against the ixor.be "LLM and Agentic AI Engineer" job posting.
+      </p>
+
+      <form id="ask-form-fit">
+        <input
+          id="question-fit"
+          type="text"
+          placeholder="What's a good fit for this role?"
+          autocomplete="off"
+          required
+        />
+        <button id="submit-btn-fit" type="submit">ASK</button>
+      </form>
+
+      <div class="example-questions">
+        <span>Try:</span>
+        <button type="button" class="chip" data-question="What's a good fit for this role?">good fit</button>
+        <button type="button" class="chip" data-question="What are the caveats compared to the job requirements?">caveats</button>
+        <button type="button" class="chip" data-question="What's missing from the CV for this job?">gaps</button>
+      </div>
+    </section>
+
+    <section class="result-section">
+      <div id="status-fit"></div>
+      <div id="answer-card-fit" class="card">
+        <div id="answer-fit"></div>
+      </div>
+      <details id="telemetry-panel-fit" class="card">
+        <summary>Execution details</summary>
+        <pre id="telemetry-fit"></pre>
+      </details>
+    </section>
   </main>
 
   <footer>
-    <p>Demo built on IXOR's public impact papers. Not an official IXOR product.</p>
+    <p>Demo built on IXOR's public impact papers and a personal CV. Not an official IXOR product.</p>
     <p><a href="https://github.com/proosttom/IxorAgent" target="_blank" rel="noopener">View source on GitHub</a></p>
   </footer>
 

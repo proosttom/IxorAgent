@@ -57,6 +57,8 @@ app.post(
   ) => {
     const question =
       typeof req.body?.question === "string" ? req.body.question.trim() : "";
+    const corpus =
+      req.body?.corpus === "cv_job_fit" ? "cv_job_fit" : "ixor_papers";
 
     if (!question) {
       res.status(400).json({ detail: "Question must not be empty." });
@@ -71,7 +73,7 @@ app.post(
       const upstream = await fetch(`${IXOR_API_URL}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, verbose: true }),
+        body: JSON.stringify({ question, corpus, verbose: true }),
       });
       const body = (await upstream.json()) as AskResponseBody | ErrorResponseBody;
       res.status(upstream.status).json(body);

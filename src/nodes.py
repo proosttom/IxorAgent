@@ -7,6 +7,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from src.llm import generate_with_llm
+from src.profiles import get_profile
 from src.state import GraphState
 from src.vectorstore import get_vector_store
 
@@ -44,29 +45,6 @@ _STOP_WORDS = {
     "we",
     "why",
 }
-_DOMAIN_TERMS = {
-    "accountability",
-    "agent",
-    "agentic",
-    "autonomy",
-    "deterministic",
-    "predictability",
-    "transparency",
-    "trust",
-}
-
-# Expands a recognized domain term toward corpus vocabulary it co-occurs with,
-# so retries search for related concepts instead of repeating the same query.
-_DOMAIN_SYNONYMS: dict[str, list[str]] = {
-    "trust": ["transparency", "predictability", "respectful", "reliability"],
-    "transparency": ["trust", "explain", "predictability"],
-    "predictability": ["consistent", "trust", "reliability"],
-    "autonomy": ["accountability", "boundaries", "oversight"],
-    "accountability": ["autonomy", "oversight", "responsibility"],
-    "agent": ["agentic", "automation", "deterministic"],
-    "agentic": ["agent", "autonomous", "automation"],
-    "deterministic": ["agent", "automation", "workflow"],
-}
 
 
 def _ensure_telemetry(state: GraphState) -> None:
@@ -96,9 +74,19 @@ def _meaningful_tokens(text: str) -> set[str]:
     }
 
 
+def _stem(token: str) -> str:
+    # Naive singularization so "caveats"/"agents" still match domain terms
+    # like "caveat"/"agent" without pulling in a full stemming dependency.
+    return token[:-1] if token.endswith("s") and len(token) > 3 else token
+
+
+def _domain_hits(tokens: set[str], domain_terms: frozenset[str]) -> set[str]:
+    return {token for token in tokens if _stem(token) in domain_terms}
+
+
 def retrieve(state: GraphState) -> GraphState:
     _ensure_telemetry(state)
-    vector_store = get_vector_store()
+    vector_store = get_vector_store(state.get("corpus", "ixor_papers"))
     # Widen the candidate pool on retries instead of re-running the same
     # narrow search that already failed to find relevant evidence.
     top_k = 3 + 2 * state.get("retry_count", 0)
@@ -121,6 +109,7 @@ def retrieve(state: GraphState) -> GraphState:
 
 def grade_documents(state: GraphState) -> GraphState:
     _ensure_telemetry(state)
+    profile = get_profile(state.get("corpus", "ixor_papers"))
     question_tokens = _meaningful_tokens(state["original_question"])
     relevant = False
 
@@ -130,9 +119,19 @@ def grade_documents(state: GraphState) -> GraphState:
         retrieval_score = document.get("score", 1.0)
 
         # Two meaningful shared terms provide a small but useful lexical signal.
-        # A single domain term is enough only for a very short, focused question.
-        if (len(overlap) >= 2 and retrieval_score >= 0.1) or (
-            len(question_tokens) == 1 and overlap.intersection(_DOMAIN_TERMS)
+        # A single domain term is enough only for a very short, focused question,
+        # unless the profile broadens that shortcut to any question length.
+        if (
+            (len(overlap) >= profile.min_overlap_terms and retrieval_score >= 0.1)
+            or (
+                len(question_tokens) == 1
+                and _domain_hits(question_tokens, profile.domain_terms)
+            )
+            or (
+                profile.broad_domain_match
+                and retrieval_score >= 0.1
+                and _domain_hits(question_tokens, profile.domain_terms)
+            )
         ):
             relevant = True
             break
@@ -159,9 +158,12 @@ def decide_to_generate(state: GraphState) -> str:
 def rewrite_query(state: GraphState) -> GraphState:
     state["retry_count"] += 1
     attempt = state["retry_count"]
+    profile = get_profile(state.get("corpus", "ixor_papers"))
 
     original_tokens = _meaningful_tokens(state["original_question"])
-    domain_hits = sorted(original_tokens & _DOMAIN_TERMS)
+    domain_hits = sorted(
+        {_stem(token) for token in original_tokens if _stem(token) in profile.domain_terms}
+    )
 
     if domain_hits:
         # Expand recognized domain terms toward related corpus vocabulary.
@@ -169,7 +171,7 @@ def rewrite_query(state: GraphState) -> GraphState:
         # the exact same expansion as the previous retry.
         expansions: list[str] = []
         for term in domain_hits:
-            expansions.extend(_DOMAIN_SYNONYMS.get(term, []))
+            expansions.extend(profile.domain_synonyms.get(term, []))
         unique_expansions = list(dict.fromkeys(expansions))
         take = (
             len(unique_expansions)
@@ -180,11 +182,7 @@ def rewrite_query(state: GraphState) -> GraphState:
     else:
         # No recognized domain term: broaden with a different generic hint
         # per attempt so retries explore different parts of the corpus.
-        extra = (
-            "trust transparency predictability agentic AI"
-            if attempt == 1
-            else "autonomy accountability deterministic automation"
-        )
+        extra = profile.rewrite_hints[0] if attempt == 1 else profile.rewrite_hints[1]
 
     new_question = f"{state['original_question']} {extra}".strip()
     if new_question == state["question"]:
@@ -200,7 +198,10 @@ def generate(state: GraphState) -> GraphState:
     if not state["documents"] or state.get("is_relevant") is not True:
         return fallback(state)
 
-    llm_answer = generate_with_llm(state["original_question"], state["documents"])
+    profile = get_profile(state.get("corpus", "ixor_papers"))
+    llm_answer = generate_with_llm(
+        state["original_question"], state["documents"], profile
+    )
     if llm_answer:
         state["generation"] = llm_answer["answer"]
         state["telemetry"]["llm"] = {
@@ -209,6 +210,14 @@ def generate(state: GraphState) -> GraphState:
         return state
 
     combined = "\n\n".join(doc["page_content"] for doc in state["documents"])
+
+    if profile.corpus != "ixor_papers":
+        state["generation"] = _extractive_fallback(
+            state["original_question"], state["documents"]
+        )
+        _record_local_llm(state, len(combined))
+        return state
+
     text = combined.lower()
     question = state["original_question"].lower()
 
@@ -272,9 +281,28 @@ def generate(state: GraphState) -> GraphState:
     return state
 
 
+def _extractive_fallback(question: str, documents: list[dict[str, Any]]) -> str:
+    """Generic local answer: surface the most on-topic sentences from evidence."""
+    question_tokens = _meaningful_tokens(question)
+    scored_sentences: list[tuple[int, str]] = []
+    for document in documents:
+        for sentence in re.split(r"(?<=[.!?])\s+", document["page_content"]):
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+            overlap = len(question_tokens & _meaningful_tokens(sentence))
+            if overlap:
+                scored_sentences.append((overlap, sentence))
+
+    if not scored_sentences:
+        return "The retrieved excerpts do not contain a clear answer to this question."
+
+    scored_sentences.sort(key=lambda item: item[0], reverse=True)
+    top_sentences = [sentence for _, sentence in scored_sentences[:3]]
+    return " ".join(top_sentences)
+
+
 def fallback(state: GraphState) -> GraphState:
-    state["generation"] = (
-        "I couldn't find sufficient IXOR material to answer this confidently. "
-        "Please rephrase the question or ask about trust, predictability, or agent suitability."
-    )
+    profile = get_profile(state.get("corpus", "ixor_papers"))
+    state["generation"] = profile.fallback_message
     return state

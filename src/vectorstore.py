@@ -11,6 +11,11 @@ DATA_DIR = PROJECT_ROOT / "data" / "ixor_papers"
 CHUNK_SIZE = 2_400
 CHUNK_OVERLAP = 300
 
+CORPUS_DIRS: Dict[str, Path] = {
+    "ixor_papers": DATA_DIR,
+    "cv_job_fit": PROJECT_ROOT / "data" / "cv_job_fit",
+}
+
 
 class SimpleVectorStore:
     """Minimal local retrieval store for the IXOR corpus.
@@ -139,8 +144,11 @@ class SimpleVectorStore:
         return results
 
 
-_vector_store = SimpleVectorStore()
+_stores: Dict[str, SimpleVectorStore] = {}
 
 
-def get_vector_store() -> SimpleVectorStore:
-    return _vector_store
+def get_vector_store(corpus: str = "ixor_papers") -> SimpleVectorStore:
+    if corpus not in _stores:
+        data_dir = CORPUS_DIRS.get(corpus, DATA_DIR)
+        _stores[corpus] = SimpleVectorStore(data_dir)
+    return _stores[corpus]

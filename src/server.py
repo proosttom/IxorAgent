@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, Literal
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -15,6 +15,7 @@ MAX_QUESTION_LENGTH = 1_000
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=MAX_QUESTION_LENGTH)
+    corpus: Literal["ixor_papers", "cv_job_fit"] = "ixor_papers"
     verbose: bool = True
 
 
@@ -62,7 +63,7 @@ def ask(request: AskRequest) -> AskResponse:
 
     request_id = str(uuid4())
     try:
-        state = run_agent(question)
+        state = run_agent(question, corpus=request.corpus)
     except Exception:
         raise HTTPException(
             status_code=500,

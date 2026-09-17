@@ -2,6 +2,7 @@
 
 export interface AskRequestBody {
   question: string;
+  corpus?: "ixor_papers" | "cv_job_fit";
 }
 
 export interface RetrievalHit {

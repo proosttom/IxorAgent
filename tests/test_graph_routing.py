@@ -249,3 +249,47 @@ def test_retrieve_widens_top_k_on_retries(mock_state):
     second_pass = retrieve(dict(mock_state))
 
     assert len(second_pass["documents"]) >= len(first_pass["documents"])
+
+
+def test_cv_job_fit_corpus_routes_and_grades_independently(mock_state):
+    mock_state["corpus"] = "cv_job_fit"
+    mock_state["question"] = "What Python experience does the candidate have?"
+    mock_state["original_question"] = mock_state["question"]
+
+    result = retrieve(mock_state)
+    assert result["documents"]
+    assert any(doc["source"] == "cv_tom_proost.txt" for doc in result["documents"])
+
+    result = grade_documents(result)
+    assert result["is_relevant"] is True
+    assert decide_to_generate(result) == "generate"
+
+
+def test_cv_job_fit_uses_generic_extractive_fallback_locally():
+    from src.graph import run_agent
+
+    result = run_agent(
+        "What Python experience does the candidate have?", corpus="cv_job_fit"
+    )
+
+    assert result["generation"]
+    assert "python" in result["generation"].lower()
+
+
+def test_cv_job_fit_bogus_question_falls_back():
+    from src.graph import run_agent
+
+    result = run_agent("zzz gardening unrelated", corpus="cv_job_fit")
+
+    assert "CV or job posting" in result["generation"]
+
+
+def test_cv_job_fit_matches_plural_domain_terms(mock_state):
+    mock_state["corpus"] = "cv_job_fit"
+    mock_state["question"] = "What are the biggest caveats?"
+    mock_state["original_question"] = mock_state["question"]
+
+    result = retrieve(mock_state)
+    result = grade_documents(result)
+
+    assert result["is_relevant"] is True

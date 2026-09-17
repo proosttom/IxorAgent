@@ -9,3 +9,4 @@ class GraphState(TypedDict):
     generation: str
     is_relevant: bool
     telemetry: Dict[str, Any]
+    corpus: str

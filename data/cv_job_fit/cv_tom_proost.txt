@@ -1,0 +1,90 @@
+Title: Tom Proost - CV
+
+Education
+- Alchemea College of Audio Engineering, London, UK: BAC accredited, Audio & Live
+  sound engineering (09/2009 to 02/2011)
+- De Nayer KUL, St Katelijne Waver, Belgium: MSc Electronics-ICT, Industrial
+  Engineering, cum laude (09/2008 to 07/2009). Thesis: uClinux and interface
+  design for remote system controllers
+- De Nayer KUL: Academic BA, Industrial Engineering, cum laude (09/2005 to 07/2008)
+- Institute Holy Heart of Maria, Berlaar, Belgium: Secondary School, economics and
+  mathematics (09/1999 to 07/2005)
+
+Work experience
+
+GoodiX Technology, Leuven (10/2019 to present)
+- Business unit: voice and audio solutions
+- Role: Scrum master (2 yrs), optimization enthusiast, R&D engineer
+- Team: automotive software (cross-discipline with 8 team members, 40 person
+  site): developing industry leading embedded automotive products from research
+  phase to customer deployment
+
+NXP Semiconductors, Haasrode (08/2015 to 10/2019)
+- Software business unit: mobile audio solutions
+- Role: R&D engineer, acoustical engineer
+- Team: strategic project team (3 yrs), automotive team (2 yrs)
+
+Verotech bvba, Haasrode (04/2014 to 07/2015)
+- Design engineering consultant at NXP
+
+Elephant Audio, Mechelen (05/2012 to present)
+- Audience mix (FOH) for Raymond van het Groenewoud, Bart Peeters and others
+- Audio engineering: recording, mixing, production, live sound
+- Owner, self-employed. Full time until April 2014
+
+MotorMusic bvba, Mechelen (08/2010 to 10/2010, 02/2011 to 03/2015)
+- System engineer broadcasting and live recording (orchestral music)
+- Recording/mixing/production engineer
+
+Apex-Audio n.v., Beringen-Paal (06/2010 to 09/2010, internship)
+- Software engineer C++
+- Touch screen software development for Intelli-X system manager: designing GUI
+  elements from the ground up, implementing and testing software prototypes
+
+Technical skills
+- Programming: Python, Matlab, C, some REST, C++, perl and bash scripting
+- Tools: VSC, WSL2, Devcontainers, Docker, Git, SVN, AWS EMR/EC2/S3, Bamboo,
+  Atlassian, Office, some GCS and SQLite
+- Operating systems: Microsoft, Linux, OS X
+- Methodologies: Agile (scrum), CMMI, Config as Code
+
+Noteworthy projects
+
+Reform test infrastructure at GoodiX Leuven site, 2024
+Sell, align cross-team, design (API, architecture) and implement an automated
+code testing system used for testing algorithms embedded in multi-variant
+products in complex environments and use cases. Restructured the codebase,
+implemented best practices, coding rules, automation infrastructure and
+automated enforcement. Reduced test implementation time from days to hours.
+
+Reform machine learning team technical debt at GoodiX, 2022
+Restructured codebase (API, architecture), implemented best practices,
+development environment, coding rules, code reviews and testing using automated
+enforcement, role definition and cross-team alignment. Aligned and standardized
+access and interfacing with AWS. Reduced new-hire ramp-up from months to days.
+
+Genetic Algorithm automated tuning tool at NXP, 2019
+Development of a tool to automate complex DSP algorithm parameter tuning. GA
+using semi-random parameter generation. AWS EMR/S3 was used to reduce overall
+tuning time from weeks to hours.
+
+Automated audio lab benchmarking framework at NXP, 2018
+Development of a system to standardize and automate voice processing
+benchmarks using OO Matlab. The system integrated configuration, audio
+capturing, multi-protocol interfacing, preprocessing, metric evaluation, file
+handling, remote storage and result sharing. Used by all R&D teams to compare
+in-house solutions against production devices.
+
+Languages
+- Dutch: native
+- English: strong
+- French: strong foundation
+
+Other interests
+- Technology and ecology
+- Learning new skills
+- Music, live sound
+- Hiking, nature
+- TEDx Mechelen
+
+References available upon request.

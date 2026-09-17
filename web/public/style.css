@@ -79,13 +79,15 @@ main {
   max-width: 46rem;
 }
 
-#ask-form {
+#ask-form,
+#ask-form-fit {
   display: flex;
   gap: 0.6rem;
   margin: 1.75rem 0 0.75rem;
 }
 
-#question {
+#question,
+#question-fit {
   flex: 1;
   padding: 0.85rem 1rem;
   border: 1px solid var(--border);
@@ -94,7 +96,8 @@ main {
   background: #fff;
 }
 
-#question:focus {
+#question:focus,
+#question-fit:focus {
   outline: 2px solid var(--mint);
   outline-offset: 1px;
 }
@@ -104,7 +107,8 @@ button {
   cursor: pointer;
 }
 
-#submit-btn {
+#submit-btn,
+#submit-btn-fit {
   background: var(--mint);
   color: #fff;
   border: none;
@@ -116,11 +120,13 @@ button {
   text-transform: uppercase;
 }
 
-#submit-btn:hover {
+#submit-btn:hover,
+#submit-btn-fit:hover {
   background: var(--mint-dark);
 }
 
-#submit-btn:disabled {
+#submit-btn:disabled,
+#submit-btn-fit:disabled {
   opacity: 0.6;
   cursor: default;
 }
@@ -151,7 +157,8 @@ button {
   color: var(--mint-dark);
 }
 
-#status {
+#status,
+#status-fit {
   color: var(--muted);
   font-size: 0.9rem;
   min-height: 1.2rem;
@@ -167,12 +174,14 @@ button {
   display: none;
 }
 
-#answer {
+#answer,
+#answer-fit {
   white-space: pre-wrap;
   font-size: 1.02rem;
 }
 
-#telemetry-panel summary {
+#telemetry-panel summary,
+#telemetry-panel-fit summary {
   cursor: pointer;
   font-weight: 800;
   text-transform: uppercase;
@@ -181,7 +190,8 @@ button {
   color: var(--mint-dark);
 }
 
-#telemetry {
+#telemetry,
+#telemetry-fit {
   overflow-x: auto;
   background: var(--cream);
   padding: 0.85rem;
@@ -189,6 +199,12 @@ button {
   font-size: 0.82rem;
   margin-top: 0.75rem;
   margin-bottom: 0;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
 }
 
 footer {

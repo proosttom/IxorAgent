@@ -45,3 +45,25 @@ def test_ask_rejects_question_over_limit(client):
     response = client.post("/ask", json={"question": "x" * 1_001})
 
     assert response.status_code == 422
+
+
+def test_ask_supports_cv_job_fit_corpus(client):
+    response = client.post(
+        "/ask",
+        json={
+            "question": "What Python experience does the candidate have?",
+            "corpus": "cv_job_fit",
+            "verbose": False,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["answer"]
+
+
+def test_ask_rejects_invalid_corpus(client):
+    response = client.post(
+        "/ask", json={"question": "hello", "corpus": "not_a_real_corpus"}
+    )
+
+    assert response.status_code == 422
