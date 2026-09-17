@@ -5,10 +5,39 @@ import re
 from typing import Any
 
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
 DEFAULT_MODEL = "gemini-2.5-flash"
+
+
+class GradeDocuments(BaseModel):
+    """Binary relevance assessment used as an LLM-backed second opinion."""
+
+    is_relevant: bool = Field(
+        description="True if the excerpts contain information needed to answer the question, False otherwise."
+    )
+
+
+def _resolve_provider() -> str:
+    provider = os.getenv("IXOR_LLM_PROVIDER")
+    if provider is None:
+        provider = "gemini" if os.getenv("GEMINI_API_KEY") else "local"
+    return provider.lower()
+
+
+def _gemini_client() -> Any | None:
+    if _resolve_provider() != "gemini":
+        return None
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+
+    from google import genai
+    from google.genai import types
+
+    return genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=15_000))
 
 
 _CONTEXT_STOP_WORDS = {
@@ -70,18 +99,55 @@ def _context(documents: list[dict[str, Any]], question: str) -> str:
     return "\n\n".join(selected_sources)
 
 
+def grade_relevance_with_llm(
+    question: str, documents: list[dict[str, Any]], profile: Any = None
+) -> bool | None:
+    """Ask the LLM whether the excerpts support answering the question.
+
+    Used as a second opinion when the deterministic lexical grader rejects a
+    question, so a genuinely on-topic question isn't dropped just because it
+    doesn't share literal wording with the corpus. Returns None when the
+    provider is unavailable so callers keep the lexical result.
+    """
+    client = _gemini_client()
+    if client is None:
+        return None
+
+    context = _context(documents, question)
+    if not context:
+        return None
+
+    try:
+        from google.genai import types
+
+        response = client.models.generate_content(
+            model=os.getenv("IXOR_LLM_MODEL", DEFAULT_MODEL),
+            contents=(
+                "Decide whether the excerpts below contain enough information to "
+                "answer the question. Judge strictly from the excerpts, not general "
+                "knowledge.\n\n"
+                f"Question: {question}\n\nExcerpts:\n{context}"
+            ),
+            config=types.GenerateContentConfig(
+                temperature=0,
+                max_output_tokens=50,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                response_mime_type="application/json",
+                response_schema=GradeDocuments,
+            ),
+        )
+        parsed = response.parsed
+        return parsed.is_relevant if isinstance(parsed, GradeDocuments) else None
+    except Exception:
+        return None
+
+
 def generate_with_llm(
     question: str, documents: list[dict[str, Any]], profile: Any = None
 ) -> dict[str, Any] | None:
     """Generate a grounded answer when the optional external provider is enabled."""
-    provider = os.getenv("IXOR_LLM_PROVIDER")
-    if provider is None:
-        provider = "gemini" if os.getenv("GEMINI_API_KEY") else "local"
-    if provider.lower() != "gemini":
-        return None
-
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
+    client = _gemini_client()
+    if client is None:
         return None
 
     instruction = (
@@ -95,13 +161,8 @@ def generate_with_llm(
     )
 
     try:
-        from google import genai
         from google.genai import types
 
-        client = genai.Client(
-            api_key=api_key,
-            http_options=types.HttpOptions(timeout=15_000),
-        )
         context = _context(documents, question)
         response = client.models.generate_content(
             model=os.getenv("IXOR_LLM_MODEL", DEFAULT_MODEL),

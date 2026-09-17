@@ -4,22 +4,12 @@ import re
 from collections import Counter
 from typing import Any
 
-from pydantic import BaseModel, Field
-
-from src.llm import generate_with_llm
+from src.llm import generate_with_llm, grade_relevance_with_llm
 from src.profiles import get_profile
 from src.state import GraphState
 from src.vectorstore import get_vector_store
 
 MAX_RETRIES = 2
-
-
-class GradeDocuments(BaseModel):
-    """Binary assessment of document relevance."""
-
-    is_relevant: bool = Field(
-        description="True if the retrieved documents contain information needed to answer the question, False otherwise."
-    )
 
 
 _STOP_WORDS = {
@@ -138,9 +128,25 @@ def grade_documents(state: GraphState) -> GraphState:
 
     state["is_relevant"] = relevant
     state["generation"] = ""
+    graded_by = "lexical"
+
+    if not relevant and profile.use_llm_grading and state["documents"]:
+        # A lexical rejection may just mean the question doesn't share literal
+        # wording with the corpus (e.g. "caveats" vs. specific job terms). Give
+        # the LLM a bounded second opinion grounded in the same excerpts before
+        # giving up on a genuinely on-topic question.
+        llm_verdict = grade_relevance_with_llm(
+            state["original_question"], state["documents"], profile
+        )
+        if llm_verdict is not None:
+            relevant = llm_verdict
+            graded_by = "llm"
+            state["is_relevant"] = relevant
+
     state["telemetry"]["relevance"] = {
         "is_relevant": relevant,
         "question_terms": len(question_tokens),
+        "graded_by": graded_by,
     }
     return state
 

@@ -17,6 +17,9 @@ class AgentProfile:
     # When true, any recognized domain term in the question is enough evidence
     # regardless of question length (used for narrow, single-topic corpora).
     broad_domain_match: bool = False
+    # When true, a lexical rejection gets a second opinion from the LLM before
+    # falling back, instead of relying solely on lexical overlap heuristics.
+    use_llm_grading: bool = False
 
 
 _IXOR_PAPERS = AgentProfile(
@@ -54,7 +57,8 @@ _IXOR_PAPERS = AgentProfile(
     ),
     fallback_message=(
         "I couldn't find sufficient IXOR material to answer this confidently. "
-        "Please rephrase the question or ask about trust, predictability, or agent suitability."
+        "Please rephrase the question or ask about trust, predictability, or "
+        "agent suitability."
     ),
 )
 
@@ -93,18 +97,19 @@ _CV_JOB_FIT = AgentProfile(
     llm_instruction=(
         "Answer only from these excerpts comparing a candidate CV against a job "
         "posting. Use 2-4 complete sentences, maximum 120 words. Point out "
-        "concrete matches and concrete gaps or caveats. Cite source filenames "
-        "in square brackets and do not invent facts."
+        "concrete matches and concrete gaps or caveats. Do not invent facts."
     ),
     fallback_message=(
-        "I couldn't find sufficient CV or job posting material to answer this confidently. "
-        "Please rephrase the question or ask about fit, required skills, or caveats."
+        "I couldn't find sufficient CV or job posting material to answer this "
+        "confidently. Please rephrase the question or ask about fit, required "
+        "skills, or caveats."
     ),
     # Narrow two-document corpus: synthesis questions ("fit", "caveats") rarely
     # share literal wording with the source text, so a single overlapping term
     # is enough evidence, unlike the broader multi-paper IXOR corpus.
     min_overlap_terms=1,
     broad_domain_match=True,
+    use_llm_grading=True,
 )
 
 PROFILES: dict[str, AgentProfile] = {
