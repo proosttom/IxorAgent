@@ -2,6 +2,21 @@
 
 A compact corrective RAG prototype built around IXOR's impact papers on trust, autonomy, and agentic AI.
 
+## Tech Stack
+
+| Technology | Role |
+| --- | --- |
+| **Python 3.13** | Core language for the CRAG graph, retrieval, and API. |
+| **FastAPI** | HTTP API (`/health`, `/ask`) with Pydantic request/response validation. |
+| **Uvicorn** | ASGI server running the FastAPI app. |
+| **Custom LangGraph-style state graph** | Deterministic retrieve → grade → generate/rewrite/fallback routing (`src/graph.py`, `src/nodes.py`). |
+| **Google Gemini API** (`google-genai`) | Optional grounded answer synthesis and LLM-assisted relevance grading; the app runs fully offline without it. |
+| **pytest** | Unit tests for routing, retrieval, relevance grading, and the API. |
+| **Node.js / Express** | Same-origin proxy and static host for the browser UI (`web/src/server.ts`). |
+| **TypeScript** | Typed server and client code, compiled separately for Node and the browser. |
+| **Netlify Functions** | Alternative serverless deployment target for the same Express app. |
+| **Docker** | Container image for the Python API, used for Render/Cloud Run deployment. |
+
 ## Architecture
 
 ```text
